@@ -1,0 +1,19 @@
+{
+  "name": "js_chess_game_exercise",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PdoubleU/js_chess_game_exercise_02_2021.git"
+  },
+  "author": "PdoubleU",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PdoubleU/js_chess_game_exercise_02_2021/issues"
+  },
+  "homepage": "https://github.com/PdoubleU/js_chess_game_exercise_02_2021#readme"
+}
