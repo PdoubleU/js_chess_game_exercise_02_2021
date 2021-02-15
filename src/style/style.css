@@ -1,0 +1,28 @@
+#root {
+	display: inline;
+}
+.board_container {
+	border: 2px darkslategrey solid;
+	width: 24rem;
+	height: 24rem;
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	grid-template-rows: 100%;
+}
+.column {
+	display: grid;
+	grid-template-columns: 100%;
+	grid-template-rows: repeat(8, 1fr);
+}
+.square {
+	width: 3rem;
+	height: 3rem;
+	background-color: black;
+	color: white;
+	text-align: center;
+	line-height: 3rem;
+}
+.w {
+	background-color: white;
+	color: darkslategrey;
+}
