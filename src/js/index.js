@@ -1,19 +1,82 @@
+class Game {
+    constructor(gameTime) {
+        this.gameTime = gameTime;
+        this.whiteSetOfPieces = [];
+        this.blackSetOfPieces = [];
+        this.whiteTime = null;
+        this.blackTime = null;
+        this.turn = 'white';
+        this.capturedWhite = [];
+        this.capturedBlack = [];
+        this.currentBoard = new Board;
+        this.root = document.querySelector('#root');
+        this.renderedBoard =  this.renderBoard();
+        this.gameHistory = [];
+        this.choosenPice = null;
+        this.listOfSquares = document.querySelectorAll('.square');
+
+        this.movePiece();
+        this.makeSetOfPieces = this.makeSetOfPieces.bind(this);
+
+    }
+    switchTimer() {
+        //to do
+    }
+    addBoardStateToHistory(){
+
+    }
+    movePiece() {
+        this.listOfSquares.forEach(square => square.addEventListener('click', e => {
+            if (this.choosenPiece === e.target.id) {
+                this.choosenPiece = null;
+                return;
+            }
+            else if (this.choosenPiece != e.target.id && this.choosenPiece != null) {
+                let currSquare = document.querySelector(`#${this.choosenPiece}`),
+                moveOnSquare = document.querySelector(`#${e.target.id}`),
+                currSquareClass = currSquare.classList[2];
+
+                moveOnSquare.classList.remove(e.target.classList[2]);
+                currSquare.classList.remove(currSquareClass);
+                currSquare.classList.add('null');
+                moveOnSquare.classList.add(currSquareClass);
+                this.choosenPiece = null;
+                // switch turns depends on the current this.turn value:
+                this.turn = this.turn === 'white' ? 'black' : 'white';
+                // switch timer:
+                    // to do
+                return;
+            }
+            else {
+                this.choosenPiece = e.target.id;
+            }
+        }
+        ));
+    }
+    renderBoard() {
+        this.root.append(this.currentBoard.printBoard())
+    }
+    makeSetOfPieces() {
+        console.log('pik');
+        for (let elem in this.currentBoard.board) {
+            for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
+                console.log(this.currentBoard.board[elem][i])
+            }
+        }
+    }
+
+}
+
 class Board {
     constructor(){
-        // below define rows and columns, as well as first column name represents as integer 97 which is refering to lower case letter a in asci
+        // below define rows and  first column name represented as integer 97 which is refering to lower case letter 'a' in asci:
         this.rows = 8;
         this.firstColumn = 97;
         // property board represents the newly created board thanks to method createBoard()
         this.board = this.createBoard();
-
-        //call set of methods to populate already created board with uppercase or lowercase letters all refering particular piece. Uppercase for White pieces.
+        //call method to populate already created board with uppercase or lowercase letters all refering particular piece. Uppercase for White pieces.
         //P,p: pawns; R,r: rooks; N,n: knights; B,b: bishops; Q,q: queen; K,k: king:
-        this.populatePawns();
-        this.populateRooks();
-        this.populateKnights();
-        this.populateBishops();
-        this.populateQueens();
-        this.populateKings();
+        this.populateWithPieces();
     }
     createBoard() {
         let board = {};
@@ -25,35 +88,31 @@ class Board {
             }
         return board;
     }
-    populatePawns() {
+    populateWithPieces() {
+        // if piece appears multiple times in on colour then class name has additional appendix to differ between pieces:
         for (let i = 97; i < 105; i++){
-            this.board[String.fromCharCode(i)][1][1] = 'P';
-            this.board[String.fromCharCode(i)][6][1] = 'p';
+            // pawns:
+            this.board[String.fromCharCode(i)][1][1] = `P-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][6][1] = `p-${String.fromCharCode(i)}`;
         }
-    }
-    populateRooks() {
         for (let i = 97; i < 105; i += 7){
-            this.board[String.fromCharCode(i)][0][1] = 'R';
-            this.board[String.fromCharCode(i)][7][1] = 'r';
+            // rooks:
+            this.board[String.fromCharCode(i)][0][1] = `R-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `r-${String.fromCharCode(i)}`;
         }
-    }
-    populateKnights() {
         for (let i = 98; i < 104; i += 5){
-            this.board[String.fromCharCode(i)][0][1] = 'N';
-            this.board[String.fromCharCode(i)][7][1] = 'n';
+            // knights:
+            this.board[String.fromCharCode(i)][0][1] = `N-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `n-${String.fromCharCode(i)}`;
         }
-    }
-    populateBishops() {
         for (let i = 99; i < 103; i += 3){
-            this.board[String.fromCharCode(i)][0][1] = 'B';
-            this.board[String.fromCharCode(i)][7][1] = 'b';
+            // bishops:
+            this.board[String.fromCharCode(i)][0][1] = `B-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `b-${String.fromCharCode(i)}`;
         }
-    }
-    populateQueens() {
+        // kings and qeens:
         this.board[String.fromCharCode(100)][0][1] = 'Q';
         this.board[String.fromCharCode(100)][7][1] = 'q';
-    }
-    populateKings() {
         this.board[String.fromCharCode(101)][0][1] = 'K';
         this.board[String.fromCharCode(101)][7][1] = 'k';
     }
@@ -68,7 +127,7 @@ class Board {
             container.append(column);
             for (let i = 0; i < this.board[elem].length; i++) {
                 let square = document.createElement('div');
-                square.classList.add('square', `${this.board[elem][i][1]}`, `${color}`);
+                square.classList.add('square', `${color}`, `${this.board[elem][i][1]}`);
                 square.id = `${elem}${this.board[elem][i][0]}`;
                 square.textContent = `${elem}${this.board[elem][i][0]}`;
                 container.lastChild.prepend(square);
@@ -83,56 +142,21 @@ class Board {
     }
 }
 
-class Move {
-    constructor(id, piece, isFirst) {
-        this.id = id;
-        this.piece = piece;
-        this.isFirst = isFirst;
-        this.currentSquare = null;
-        this.nextSquare = null;
-    }
-
-    firstClick() {
-        if (this.isFirst !== null) {
-            console.log('false, this is not first click!');
-            return false;
-        } else {
-            this.currentSquare = this.id;
-            console.log('first click!');
-            return true;
-        }
-    }
-    secondClick() {
-        if (this.isFirst === null) {
-            console.log('false, this is not second click!');
-            return false;
-        } else {
-            this.nextSquare = this.id;
-            console.log('second click!');
-            return true;
-        }
+class Pawn {
+    constructor(coordinates, color){
+        this.color = color;
+        this.position = coordinates;
+        this.move = null;
+        this.specialMove = true;
+        this.promote = true;
+        this.capture = null;
     }
 }
 
 
-let newGame = new Board();
-console.log(newGame.board);
+let newGame = new Game(15);
+newGame.makeSetOfPieces();
 
-let root = document.querySelector('#root');
-root.append(newGame.printBoard())
 
-let isFirst = null;
-
-document.querySelectorAll('.square').forEach(element => element.addEventListener('click', e => {
-            let checkMove = new Move(e.target.id, null, isFirst)
-            if(checkMove.firstClick()) {
-                isFirst = e.target.id;
-            }
-            if (checkMove.secondClick()) {
-                isFirst = null;
-            };
-        }
-    )
-)
 
 
