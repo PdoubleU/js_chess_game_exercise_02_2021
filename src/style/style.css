@@ -27,13 +27,17 @@
 	background-color: white;
 	color: darkslategrey;
 }
-.P-a,
-.P-b,
-.P-c,
-.P-d,
-.P-e,
-.P-f,
-.P-g,
-.P-h {
-	background-color: green;
+.P_a,
+.P_b,
+.P_c,
+.P_d,
+.P_e,
+.P_f,
+.P_g,
+.P_h {
+	z-index: 10;
+	background-image: url("../assets/pawn_white.svg");
+	background-size: 2.5rem;
+	background-position: center;
+	background-repeat: no-repeat;
 }

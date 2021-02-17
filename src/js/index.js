@@ -15,26 +15,60 @@ class Game {
         this.choosenPice = null;
         this.listOfSquares = document.querySelectorAll('.square');
 
+        this.makeSetOfPieces();
         this.movePiece();
-        this.makeSetOfPieces = this.makeSetOfPieces.bind(this);
+        this.checkIfValidMove('h3', 'a2', { x: 0, y: 1});
+
 
     }
     switchTimer() {
         //to do
     }
     addBoardStateToHistory(){
+        //to do
+    }
+    checkIfValidMove(targetPosition, currPosition, allowedMove) {
+        let targetX = targetPosition.split('')[0].charCodeAt(0),
+            targetY = parseInt(targetPosition.split('')[1]),
+            currentX = currPosition.split('')[0].charCodeAt(0),
+            currentY = parseInt(currPosition.split('')[1]),
+            allowedX = allowedMove.x,
+            allowedY = allowedMove.y;
+        /* set of console log tests:
+        console.log(targetX);
+        console.log(targetY);
 
+        console.log(currentX);
+        console.log(currentY);
+        
+        console.log(allowedX);
+        console.log(allowedY);
+
+        console.log(targetY - currentY);
+        console.log(targetX - currentX);
+        */
+        ((targetY - currentY == allowedY) && (targetX - currentX == allowedX))
+        ?
+        true
+        :
+        false;
     }
     movePiece() {
+        console.log(this.whiteSetOfPieces.length);
+        console.log(this.whiteSetOfPieces[1]);
         this.listOfSquares.forEach(square => square.addEventListener('click', e => {
+            e.preventDefault();
+            console.log(this.whiteSetOfPieces);
             if (this.choosenPiece === e.target.id) {
                 this.choosenPiece = null;
                 return;
             }
-            else if (this.choosenPiece != e.target.id && this.choosenPiece != null) {
+            else if (this.choosenPiece != e.target.id && this.choosenPiece != null && this.checkIfValidMove(e.target.id, this.choosenPiece, this.whiteSetOfPieces[0].basicMove)) {
                 let currSquare = document.querySelector(`#${this.choosenPiece}`),
-                moveOnSquare = document.querySelector(`#${e.target.id}`),
-                currSquareClass = currSquare.classList[2];
+                    moveOnSquare = document.querySelector(`#${e.target.id}`),
+                    currSquareClass = currSquare.classList[2];
+
+                console.log(e.target.id)
 
                 moveOnSquare.classList.remove(e.target.classList[2]);
                 currSquare.classList.remove(currSquareClass);
@@ -54,6 +88,7 @@ class Game {
         ));
     }
     renderBoard() {
+        // render board inside index.html: 
         this.root.append(this.currentBoard.printBoard())
     }
     makeSetOfPieces() {
@@ -61,9 +96,9 @@ class Game {
         for (let elem in this.currentBoard.board) {
             for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
                 let pieceID = this.currentBoard.board[elem][i][1],
-                coordinates = [elem, this.currentBoard.board[elem][i][0]]
+                    coordinates = [elem, this.currentBoard.board[elem][i][0]]
                 if (pieceID === 'null') {
-                    return;
+                    void 0;
                 }
                 else if(/B_|K_|N_|P_|R_|Q_/.test(pieceID)) {
                     switch(pieceID.match(/[A-Z]_/)[0]) {
@@ -112,7 +147,7 @@ class Game {
                             this.blackSetOfPieces.push(new King(pieceID, coordinates, 'black'));
                             break;
                         default:
-                            console.log('Error: index.js:89, switch statement')
+                            console.log('Error: index.js:146, switch statement')
                             break;
                     }
                 }
@@ -120,7 +155,6 @@ class Game {
             }
         }
     }
-
 }
 
 class Board {
@@ -174,8 +208,8 @@ class Board {
     }
     // method called just after creating the board. This method returns html tags with elements referencing to all squares on chessboard with their proper id's:
     printBoard(){
-        let color = 'b';
-        let container = document.createElement('div');
+        let color = 'b',
+            container = document.createElement('div');
         container.classList.add('board_container')
         for (let elem in this.board) {
             let column = document.createElement('div');
@@ -203,10 +237,19 @@ class Pawn {
         this.id = id;
         this.color = color;
         this.position = coordinates;
-        this.move = null;
         this.specialMove = true;
         this.promote = true;
         this.capture = null;
+        this.basicMove = this.setMove();
+    }
+    setMove() {
+        let obj;
+        this.color === 'white'
+        ?
+        obj = { x : 1, y : 0 }
+        :
+        obj = { x : -1, y : 0 }
+        return obj;
     }
 }
 class Rook {
@@ -263,10 +306,3 @@ class King {
 
 let newGame = new Game(15);
 newGame.makeSetOfPieces();
-console.log(newGame.blackSetOfPieces);
-console.log(newGame.whiteSetOfPieces);
-
-
-
-
-
