@@ -57,10 +57,66 @@ class Game {
         this.root.append(this.currentBoard.printBoard())
     }
     makeSetOfPieces() {
-        console.log('pik');
+        // method iterate through initialy set board and fill two arrays with newly created objects which unique names and coordinates on the board:
         for (let elem in this.currentBoard.board) {
             for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
-                console.log(this.currentBoard.board[elem][i])
+                let pieceID = this.currentBoard.board[elem][i][1],
+                coordinates = [elem, this.currentBoard.board[elem][i][0]]
+                if (pieceID === 'null') {
+                    return;
+                }
+                else if(/B_|K_|N_|P_|R_|Q_/.test(pieceID)) {
+                    switch(pieceID.match(/[A-Z]_/)[0]) {
+                        case 'P_':
+                            this.whiteSetOfPieces.push(new Pawn(pieceID, coordinates, 'white'));
+                            break;
+                        case 'R_':
+                            this.whiteSetOfPieces.push(new Rook(pieceID, coordinates, 'white'));
+                            break;
+                        case 'N_':
+                            this.whiteSetOfPieces.push(new Knight(pieceID, coordinates, 'white'));
+                            break;
+                        case 'B_':
+                            this.whiteSetOfPieces.push(new Bishop(pieceID, coordinates, 'white'));
+                            break;
+                        case 'Q_':
+                            this.whiteSetOfPieces.push(new Queen(pieceID, coordinates, 'white'));
+                            break;
+                        case 'K_':
+                            this.whiteSetOfPieces.push(new King(pieceID, coordinates, 'white'));
+                            break;
+                        default:
+                            console.log('Error: index.js:89, switch statement')
+                            break;
+                    }
+
+                }
+                else if(/b_|k_|n_|p_|r_|q_/.test(pieceID)) {
+                    switch(pieceID.match(/[a-z]_/)[0]) {
+                        case 'p_':
+                            this.blackSetOfPieces.push(new Pawn(pieceID, coordinates, 'black'));
+                            break;
+                        case 'r_':
+                            this.blackSetOfPieces.push(new Rook(pieceID, coordinates, 'black'));
+                            break;
+                        case 'n_':
+                            this.blackSetOfPieces.push(new Knight(pieceID, coordinates, 'black'));
+                            break;
+                        case 'b_':
+                            this.blackSetOfPieces.push(new Bishop(pieceID, coordinates, 'black'));
+                            break;
+                        case 'q_':
+                            this.blackSetOfPieces.push(new Queen(pieceID, coordinates, 'black'));
+                            break;
+                        case 'k_':
+                            this.blackSetOfPieces.push(new King(pieceID, coordinates, 'black'));
+                            break;
+                        default:
+                            console.log('Error: index.js:89, switch statement')
+                            break;
+                    }
+                }
+
             }
         }
     }
@@ -92,29 +148,29 @@ class Board {
         // if piece appears multiple times in on colour then class name has additional appendix to differ between pieces:
         for (let i = 97; i < 105; i++){
             // pawns:
-            this.board[String.fromCharCode(i)][1][1] = `P-${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][6][1] = `p-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
         }
         for (let i = 97; i < 105; i += 7){
             // rooks:
-            this.board[String.fromCharCode(i)][0][1] = `R-${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][7][1] = `r-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][0][1] = `R_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `r_${String.fromCharCode(i)}`;
         }
         for (let i = 98; i < 104; i += 5){
             // knights:
-            this.board[String.fromCharCode(i)][0][1] = `N-${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][7][1] = `n-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][0][1] = `N_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `n_${String.fromCharCode(i)}`;
         }
         for (let i = 99; i < 103; i += 3){
             // bishops:
-            this.board[String.fromCharCode(i)][0][1] = `B-${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][7][1] = `b-${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][0][1] = `B_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `b_${String.fromCharCode(i)}`;
         }
         // kings and qeens:
-        this.board[String.fromCharCode(100)][0][1] = 'Q';
-        this.board[String.fromCharCode(100)][7][1] = 'q';
-        this.board[String.fromCharCode(101)][0][1] = 'K';
-        this.board[String.fromCharCode(101)][7][1] = 'k';
+        this.board[String.fromCharCode(100)][0][1] = `Q_d`;
+        this.board[String.fromCharCode(100)][7][1] = `q_d`;
+        this.board[String.fromCharCode(101)][0][1] = `K_e`;
+        this.board[String.fromCharCode(101)][7][1] = `k_e`;
     }
     // method called just after creating the board. This method returns html tags with elements referencing to all squares on chessboard with their proper id's:
     printBoard(){
@@ -143,6 +199,57 @@ class Board {
 }
 
 class Pawn {
+    constructor(id, coordinates, color){
+        this.id = id;
+        this.color = color;
+        this.position = coordinates;
+        this.move = null;
+        this.specialMove = true;
+        this.promote = true;
+        this.capture = null;
+    }
+}
+class Rook {
+    constructor(coordinates, color){
+        this.color = color;
+        this.position = coordinates;
+        this.move = null;
+        this.specialMove = true;
+        this.promote = true;
+        this.capture = null;
+    }
+}
+class Knight {
+    constructor(coordinates, color){
+        this.color = color;
+        this.position = coordinates;
+        this.move = null;
+        this.specialMove = true;
+        this.promote = true;
+        this.capture = null;
+    }
+}
+class Bishop {
+    constructor(coordinates, color){
+        this.color = color;
+        this.position = coordinates;
+        this.move = null;
+        this.specialMove = true;
+        this.promote = true;
+        this.capture = null;
+    }
+}
+class Queen {
+    constructor(coordinates, color){
+        this.color = color;
+        this.position = coordinates;
+        this.move = null;
+        this.specialMove = true;
+        this.promote = true;
+        this.capture = null;
+    }
+}
+class King {
     constructor(coordinates, color){
         this.color = color;
         this.position = coordinates;
@@ -156,6 +263,9 @@ class Pawn {
 
 let newGame = new Game(15);
 newGame.makeSetOfPieces();
+console.log(newGame.blackSetOfPieces);
+console.log(newGame.whiteSetOfPieces);
+
 
 
 
