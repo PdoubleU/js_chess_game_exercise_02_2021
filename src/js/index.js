@@ -16,16 +16,9 @@ class Game {
         this.listOfSquares = document.querySelectorAll('.square');
 
         this.makeSetOfPieces();
-        this.movePiece();
-        this.checkIfValidMove('h3', 'a2', { x: 0, y: 1});
+        this.selectAndMovePiece();
+        this.findPieceInSet();
 
-
-    }
-    switchTimer() {
-        //to do
-    }
-    addBoardStateToHistory(){
-        //to do
     }
     checkIfValidMove(targetPosition, currPosition, allowedMove) {
         let targetX = targetPosition.split('')[0].charCodeAt(0),
@@ -40,41 +33,63 @@ class Game {
 
         console.log(currentX);
         console.log(currentY);
-        
+
         console.log(allowedX);
         console.log(allowedY);
 
         console.log(targetY - currentY);
         console.log(targetX - currentX);
+        (targetY - currentY == allowedY) && (targetX - currentX == allowedX)
         */
-        ((targetY - currentY == allowedY) && (targetX - currentX == allowedX))
-        ?
-        true
-        :
-        false;
+
+        if ((targetY - currentY == allowedY) && (targetX - currentX == allowedX)) {
+            return true
+        } else {
+            return false
+        }
+
     }
-    movePiece() {
-        console.log(this.whiteSetOfPieces.length);
-        console.log(this.whiteSetOfPieces[1]);
+    findPieceInSet(id) {
+        if(this.turn === 'white') {
+            for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
+                if (this.whiteSetOfPieces[i].id === id) {
+                    return this.whiteSetOfPieces[i]
+                }
+            }
+
+        }
+        else {
+            for (let i = 0; i< this.blackSetOfPieces.length; i++) {
+                if (this.blackSetOfPieces[i].id === id) {
+                    return this.blackSetOfPieces[i]
+                }
+            }
+        }
+    }
+    selectAndMovePiece() {
+
         this.listOfSquares.forEach(square => square.addEventListener('click', e => {
-            e.preventDefault();
-            console.log(this.whiteSetOfPieces);
-            if (this.choosenPiece === e.target.id) {
-                this.choosenPiece = null;
+
+            if (this.choosenPieceID === e.target.id) {
+                this.choosenPieceID = null;
                 return;
             }
-            else if (this.choosenPiece != e.target.id && this.choosenPiece != null && this.checkIfValidMove(e.target.id, this.choosenPiece, this.whiteSetOfPieces[0].basicMove)) {
-                let currSquare = document.querySelector(`#${this.choosenPiece}`),
-                    moveOnSquare = document.querySelector(`#${e.target.id}`),
-                    currSquareClass = currSquare.classList[2];
+            else if (this.choosenPieceID != e.target.id
+                    && this.choosenPieceID != null
+                    && this.checkIfValidMove(e.target.id, this.choosenPieceID, this.whiteSetOfPieces[1].basicMove)) {
 
-                console.log(e.target.id)
+                let currSquare = document.querySelector(`#${this.choosenPieceID}`),
+                    moveOnSquare = document.querySelector(`#${e.target.id}`),
+                    currSquareClass = currSquare.classList[2],
+                    piece = this.findPieceInSet(currSquareClass);
+
+                console.log(piece);
 
                 moveOnSquare.classList.remove(e.target.classList[2]);
                 currSquare.classList.remove(currSquareClass);
                 currSquare.classList.add('null');
                 moveOnSquare.classList.add(currSquareClass);
-                this.choosenPiece = null;
+                this.choosenPieceID = null;
                 // switch turns depends on the current this.turn value:
                 this.turn = this.turn === 'white' ? 'black' : 'white';
                 // switch timer:
@@ -82,13 +97,13 @@ class Game {
                 return;
             }
             else {
-                this.choosenPiece = e.target.id;
+                this.choosenPieceID = e.target.id;
             }
         }
         ));
     }
     renderBoard() {
-        // render board inside index.html: 
+        // render board inside index.html:
         this.root.append(this.currentBoard.printBoard())
     }
     makeSetOfPieces() {
@@ -155,6 +170,13 @@ class Game {
             }
         }
     }
+    switchTimer() {
+        //to do
+    }
+    addBoardStateToHistory(){
+        //to do
+    }
+
 }
 
 class Board {
@@ -246,14 +268,15 @@ class Pawn {
         let obj;
         this.color === 'white'
         ?
-        obj = { x : 1, y : 0 }
+        obj = { x : 0, y : 1 }
         :
-        obj = { x : -1, y : 0 }
+        obj = { x : 0, y : -1 }
         return obj;
     }
 }
 class Rook {
-    constructor(coordinates, color){
+    constructor(id, coordinates, color){
+        this.id = id;
         this.color = color;
         this.position = coordinates;
         this.move = null;
@@ -263,7 +286,8 @@ class Rook {
     }
 }
 class Knight {
-    constructor(coordinates, color){
+    constructor(id, coordinates, color){
+        this.id = id;
         this.color = color;
         this.position = coordinates;
         this.move = null;
@@ -273,7 +297,8 @@ class Knight {
     }
 }
 class Bishop {
-    constructor(coordinates, color){
+    constructor(id, coordinates, color){
+        this.id = id;
         this.color = color;
         this.position = coordinates;
         this.move = null;
@@ -283,7 +308,8 @@ class Bishop {
     }
 }
 class Queen {
-    constructor(coordinates, color){
+    constructor(id, coordinates, color){
+        this.id = id;
         this.color = color;
         this.position = coordinates;
         this.move = null;
@@ -293,7 +319,8 @@ class Queen {
     }
 }
 class King {
-    constructor(coordinates, color){
+    constructor(id, coordinates, color){
+        this.id = id;
         this.color = color;
         this.position = coordinates;
         this.move = null;
@@ -305,4 +332,3 @@ class King {
 
 
 let newGame = new Game(15);
-newGame.makeSetOfPieces();
