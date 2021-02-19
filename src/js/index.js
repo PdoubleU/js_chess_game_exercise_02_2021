@@ -17,84 +17,62 @@ class Game {
 
         this.makeSetOfPieces();
         this.selectAndMovePiece();
-        this.findPieceInSet();
+        this.evaluatePieceProperties();
 
     }
-    checkIfValidMove(targetPosition, currPosition, allowedMove) {
-        let targetX = targetPosition.split('')[0].charCodeAt(0),
-            targetY = parseInt(targetPosition.split('')[1]),
-            currentX = currPosition.split('')[0].charCodeAt(0),
-            currentY = parseInt(currPosition.split('')[1]),
-            allowedX = allowedMove.x,
-            allowedY = allowedMove.y;
-        /* set of console log tests:
-        console.log(targetX);
-        console.log(targetY);
 
-        console.log(currentX);
-        console.log(currentY);
-
-        console.log(allowedX);
-        console.log(allowedY);
-
-        console.log(targetY - currentY);
-        console.log(targetX - currentX);
-        (targetY - currentY == allowedY) && (targetX - currentX == allowedX)
-        */
-
-        if ((targetY - currentY == allowedY) && (targetX - currentX == allowedX)) {
-            return true
-        } else {
-            return false
-        }
-
-    }
-    findPieceInSet(id) {
+    evaluatePieceProperties(id, target, board) {
+        console.log('eval props');
         if(this.turn === 'white') {
             for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
                 if (this.whiteSetOfPieces[i].id === id) {
-                    return this.whiteSetOfPieces[i]
+                    console.log('white set: ');
+                    this.whiteSetOfPieces[i].validateMove = [id, target, board]
+                    console.log(this.whiteSetOfPieces[i].validateMove);
+                    return this.whiteSetOfPieces[i].validateMove;
                 }
             }
 
         }
-        else {
+        else if(this.turn === 'black') {
             for (let i = 0; i< this.blackSetOfPieces.length; i++) {
                 if (this.blackSetOfPieces[i].id === id) {
-                    return this.blackSetOfPieces[i]
+                    console.log('black set: ');
+                    this.blackSetOfPieces[i].validateMove = [id, target, board]
+                    console.log(this.blackSetOfPieces[i].validateMove);
+                    return this.blackSetOfPieces[i].validateMove;
                 }
             }
         }
     }
     selectAndMovePiece() {
-
         this.listOfSquares.forEach(square => square.addEventListener('click', e => {
-
             if (this.choosenPieceID === e.target.id) {
                 this.choosenPieceID = null;
                 return;
             }
             else if (this.choosenPieceID != e.target.id
-                    && this.choosenPieceID != null
-                    && this.checkIfValidMove(e.target.id, this.choosenPieceID, this.whiteSetOfPieces[1].basicMove)) {
+                    && this.choosenPieceID != null) {
 
                 let currSquare = document.querySelector(`#${this.choosenPieceID}`),
                     moveOnSquare = document.querySelector(`#${e.target.id}`),
-                    currSquareClass = currSquare.classList[2],
-                    piece = this.findPieceInSet(currSquareClass);
-
-                console.log(piece);
-
-                moveOnSquare.classList.remove(e.target.classList[2]);
-                currSquare.classList.remove(currSquareClass);
-                currSquare.classList.add('null');
-                moveOnSquare.classList.add(currSquareClass);
-                this.choosenPieceID = null;
-                // switch turns depends on the current this.turn value:
-                this.turn = this.turn === 'white' ? 'black' : 'white';
-                // switch timer:
-                    // to do
-                return;
+                    currSquareClass = currSquare.classList[2];
+                
+                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){   
+                    moveOnSquare.classList.remove(e.target.classList[2]);
+                    currSquare.classList.remove(currSquareClass);
+                    currSquare.classList.add('null');
+                    moveOnSquare.classList.add(currSquareClass);
+                    this.choosenPieceID = null;
+                    // switch turns depends on the current this.turn value:
+                    this.turn = this.turn === 'white' ? 'black' : 'white';
+                    // switch timer:
+                        // to do
+                    return;
+                } else {
+                    this.choosenPieceID = null;
+                }
+                
             }
             else {
                 this.choosenPieceID = e.target.id;
@@ -103,8 +81,16 @@ class Game {
         ));
     }
     renderBoard() {
-        // render board inside index.html:
-        this.root.append(this.currentBoard.printBoard())
+        // render board inside index.html or update the board if moved piece:
+        if(document.querySelector('.board_container')) {
+            document.querySelector('.board_container').remove()
+            this.root.append(this.currentBoard.printBoard())
+            // refresh Node list:
+            this.listOfSquares = document.querySelectorAll('.square')
+            this.selectAndMovePiece()
+        } else {
+            this.root.append(this.currentBoard.printBoard())
+        }
     }
     makeSetOfPieces() {
         // method iterate through initialy set board and fill two arrays with newly created objects which unique names and coordinates on the board:
@@ -259,12 +245,32 @@ class Pawn {
         this.id = id;
         this.color = color;
         this.position = coordinates;
-        this.specialMove = true;
-        this.promote = true;
-        this.capture = null;
-        this.basicMove = this.setMove();
+        this._targetSquare = null;
+        this._board = null;
+        this._isMoveValid = null;
+        
+        this.specialMoveObj = true;
+        this.promoteMoveObj = true;
+        this.captureMoveObj = this.captureMoveObj();
+        this.basicMoveObj = this.straightMoveObj();
     }
-    setMove() {
+    set validateMove(args) {
+        this._targetSquare = args[1]
+        this._board = args[2]
+        let targetX = this._targetSquare.split('')[0].charCodeAt(0),
+            targetY = parseInt(this._targetSquare.split('')[1]),
+            currentX = this.position[0].charCodeAt(0),
+            currentY = parseInt(this.position[1]);
+
+        return this.isMoveStraight([targetY, currentY, targetX, currentX])
+    }
+    get validateMove(){
+        return this._isMoveValid
+    }
+    // methods for generating different sets of objects, each object consinsts details about how
+    // the piece should or shouldn't move on the board - these objects are assinged to variables
+    // in constructor:
+    straightMoveObj() {
         let obj;
         this.color === 'white'
         ?
@@ -273,6 +279,46 @@ class Pawn {
         obj = { x : 0, y : -1 }
         return obj;
     }
+    captureMoveObj() {
+        let obj;
+        this.color === 'white'
+        ?
+        obj = { x : 1, y : 1 }
+        :
+        obj = { x : -1, y : -1 }
+        return obj;
+    }
+    promoteMoveObj() {
+        let obj;
+        this.color === 'white'
+        ?
+        obj = { x : 0, y : 1 }
+        :
+        obj = { x : 0, y : -1 }
+        return obj;
+    }
+    // methods, which are taking as parameters the objects set in constructor and arguments passed 
+    // through getter validateMove(). All methods are executed in validateMove and all together 
+    // infuence the returned boolean value:
+    isMoveStraight(args){
+        if ((args[0] - args[1] == this.basicMoveObj.y) && (args[2] - args[3] == this.basicMoveObj.x)) {
+            return this._isMoveValid = true
+        } else {
+            return this._isMoveValid = false
+        }
+    }
+    isMoveCapture(){
+
+    }
+    isMovePromote(){
+
+    }
+    isMoveObstacle(){
+
+    }
+
+
+
 }
 class Rook {
     constructor(id, coordinates, color){
@@ -332,3 +378,4 @@ class King {
 
 
 let newGame = new Game(15);
+let refresh = document.querySelector('.refresh').addEventListener('click', () => newGame.renderBoard())

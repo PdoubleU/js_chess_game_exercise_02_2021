@@ -18,7 +18,7 @@
 	cursor: pointer;
 	width: 3rem;
 	height: 3rem;
-	background-color: black;
+	background-color: brown;
 	color: white;
 	text-align: center;
 	line-height: 3rem;
@@ -37,6 +37,20 @@
 .P_h {
 	z-index: 10;
 	background-image: url("../assets/pawn_white.svg");
+	background-size: 2.5rem;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.p_a,
+.p_b,
+.p_c,
+.p_d,
+.p_e,
+.p_f,
+.p_g,
+.p_h {
+	z-index: 10;
+	background-image: url("../assets/pawn_black.svg");
 	background-size: 2.5rem;
 	background-position: center;
 	background-repeat: no-repeat;
