@@ -55,24 +55,30 @@ class Game {
                     && this.choosenPieceID != null) {
 
                 let currSquare = document.querySelector(`#${this.choosenPieceID}`),
-                    moveOnSquare = document.querySelector(`#${e.target.id}`),
-                    currSquareClass = currSquare.classList[2];
-                
-                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){   
-                    moveOnSquare.classList.remove(e.target.classList[2]);
-                    currSquare.classList.remove(currSquareClass);
-                    currSquare.classList.add('null');
-                    moveOnSquare.classList.add(currSquareClass);
-                    this.choosenPieceID = null;
+                    currSquareClass = currSquare.classList[2],
+                    targetRow = e.target.id.split('')[1],
+                    targetColumn = e.target.id.split('')[0],
+                    currentRow = this.choosenPieceID.split('')[1],
+                    currentColumn = this.choosenPieceID.split('')[0];
+
+                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){
                     // switch turns depends on the current this.turn value:
                     this.turn = this.turn === 'white' ? 'black' : 'white';
                     // switch timer:
                         // to do
+                    // update this.currentBoard:
+                    this.currentBoard.board[targetColumn][targetRow - 1][1] = this.currentBoard.board[currentColumn][currentRow - 1][1];
+                    this.currentBoard.board[currentColumn][currentRow - 1][1] = null;
+                    // render updated board:
+                    this.renderBoard();
+                    // reset variable:
+                    this.choosenPieceID = null;
+
                     return;
                 } else {
                     this.choosenPieceID = null;
                 }
-                
+
             }
             else {
                 this.choosenPieceID = e.target.id;
@@ -248,7 +254,7 @@ class Pawn {
         this._targetSquare = null;
         this._board = null;
         this._isMoveValid = null;
-        
+
         this.specialMoveObj = true;
         this.promoteMoveObj = true;
         this.captureMoveObj = this.captureMoveObj();
@@ -297,8 +303,8 @@ class Pawn {
         obj = { x : 0, y : -1 }
         return obj;
     }
-    // methods, which are taking as parameters the objects set in constructor and arguments passed 
-    // through getter validateMove(). All methods are executed in validateMove and all together 
+    // methods, which are taking as parameters the objects set in constructor and arguments passed
+    // through getter validateMove(). All methods are executed in validateMove and all together
     // infuence the returned boolean value:
     isMoveStraight(args){
         if ((args[0] - args[1] == this.basicMoveObj.y) && (args[2] - args[3] == this.basicMoveObj.x)) {
