@@ -23,11 +23,9 @@ class Game {
     }
 
     evaluatePieceProperties(id, target, board) {
-        console.log('eval props');
         if(this.turn === 'white') {
             for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
                 if (this.whiteSetOfPieces[i].id === id) {
-                    console.log('white set: ');
                     this.whiteSetOfPieces[i].validateMove = [id, target, board];
                     (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
                     return this.whiteSetOfPieces[i]._isMoveValid
@@ -38,7 +36,6 @@ class Game {
         else if(this.turn === 'black') {
             for (let i = 0; i< this.blackSetOfPieces.length; i++) {
                 if (this.blackSetOfPieces[i].id === id) {
-                    console.log('black set: ');
                     this.blackSetOfPieces[i].validateMove = [id, target, board];
                     (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
                     return this.blackSetOfPieces[i]._isMoveValid
@@ -48,7 +45,6 @@ class Game {
     }
     selectAndMovePiece() {
         this.listOfSquares.forEach(square => square.addEventListener('click', e => {
-            console.log(e.target.id)
             if (this.choosenPieceID === e.target.id) {
                 this.choosenPieceID = null;
                 return;
@@ -64,7 +60,7 @@ class Game {
                     currentColumn = this.choosenPieceID.split('')[0];
 
                 if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){
-                    console.log(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard));
+                    console.log(`evaluation of piece: ${(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard))}`);
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // switch timer:
@@ -271,16 +267,28 @@ class Pawn {
     set validateMove(args) {
         this._targetSquare = args[1]
         this._board = args[2]
-        console.log(this.position)
-        console.log(this._targetSquare)
-        let targetX = this._targetSquare.split('')[0].charCodeAt(0),
+        let capture = null,
+            basic = null,
+            targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
-            currentY = parseInt(this.position[1]);
+            currentY = parseInt(this.position[1]),
+            objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1];
+            console.log(`target piece: ${objOnTargSquare}`);
 
-        console.log(this.captureMoveObj);
+        capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare])
+        basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX])
+        console.log(`capture: ${capture}`);
+        if (capture()) {
+            return this._isMoveValid = true;
+        }
+        else if (basic()) {
+            return this._isMoveValid = true;
+        }
+        else {
+            return this._isMoveValid = false;
+        }
 
-        return this.isMoveCapture([targetY, currentY, targetX, currentX])
     }
     get validateMove() {
         return this._isMoveValid
@@ -330,10 +338,11 @@ class Pawn {
         }
     }
     isMoveCapture(args){
-        console.log(args[0] - args[1] == this.captureMoveObj.y);
-        console.log(args[2] - args[3] == this.captureMoveObj.x[0]);
-        console.log(args[2] - args[3] == this.captureMoveObj.x[1]);
-        if ((args[0] - args[1] == this.captureMoveObj.y) && (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1])) {
+        console.log(args);
+        console.log(`is captured piece enemy: ${this.isCapturedPieceEnemy(args[4])}`);
+        console.log(`is captured piece null: ${args[4] != null}`);
+
+        if ((args[0] - args[1] == this.captureMoveObj.y) && (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) && (this.isCapturedPieceEnemy(args[4])) && (args[4] != null)) {
             return this._isMoveValid = true
         } else {
             return this._isMoveValid = false
@@ -344,6 +353,14 @@ class Pawn {
     }
     isMoveObstacle(){
 
+    }
+    isCapturedPieceEnemy(targPiece) {
+        console.log(/[a-z]_/.test(targPiece));
+        if (this.color === 'white')  {
+            return (/[a-z]_/.test(targPiece))
+        } else  {
+            return (/[A-Z]_/.test(targPiece))
+        }
     }
 
 
