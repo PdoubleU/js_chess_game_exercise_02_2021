@@ -18,6 +18,7 @@ class Game {
         this.makeSetOfPieces();
         this.selectAndMovePiece();
         this.evaluatePieceProperties();
+        this.renderPanel();
 
     }
 
@@ -27,9 +28,9 @@ class Game {
             for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
                 if (this.whiteSetOfPieces[i].id === id) {
                     console.log('white set: ');
-                    this.whiteSetOfPieces[i].validateMove = [id, target, board]
-                    console.log(this.whiteSetOfPieces[i].validateMove);
-                    return this.whiteSetOfPieces[i].validateMove;
+                    this.whiteSetOfPieces[i].validateMove = [id, target, board];
+                    (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
+                    return this.whiteSetOfPieces[i]._isMoveValid
                 }
             }
 
@@ -38,15 +39,16 @@ class Game {
             for (let i = 0; i< this.blackSetOfPieces.length; i++) {
                 if (this.blackSetOfPieces[i].id === id) {
                     console.log('black set: ');
-                    this.blackSetOfPieces[i].validateMove = [id, target, board]
-                    console.log(this.blackSetOfPieces[i].validateMove);
-                    return this.blackSetOfPieces[i].validateMove;
+                    this.blackSetOfPieces[i].validateMove = [id, target, board];
+                    (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
+                    return this.blackSetOfPieces[i]._isMoveValid
                 }
             }
         }
     }
     selectAndMovePiece() {
         this.listOfSquares.forEach(square => square.addEventListener('click', e => {
+            console.log(e.target.id)
             if (this.choosenPieceID === e.target.id) {
                 this.choosenPieceID = null;
                 return;
@@ -62,8 +64,9 @@ class Game {
                     currentColumn = this.choosenPieceID.split('')[0];
 
                 if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){
+                    console.log(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard));
                     // switch turns depends on the current this.turn value:
-                    this.turn = this.turn === 'white' ? 'black' : 'white';
+                    this.switchPlayer()
                     // switch timer:
                         // to do
                     // update this.currentBoard:
@@ -97,6 +100,9 @@ class Game {
         } else {
             this.root.append(this.currentBoard.printBoard())
         }
+    }
+    renderPanel() {
+        document.querySelector('.player').innerHTML = this.turn;
     }
     makeSetOfPieces() {
         // method iterate through initialy set board and fill two arrays with newly created objects which unique names and coordinates on the board:
@@ -168,7 +174,10 @@ class Game {
     addBoardStateToHistory(){
         //to do
     }
-
+    switchPlayer() {
+        this.turn = this.turn === 'white' ? 'black' : 'white';
+        this.renderPanel()
+    }
 }
 
 class Board {
@@ -245,7 +254,6 @@ class Board {
         return container;
     }
 }
-
 class Pawn {
     constructor(id, coordinates, color){
         this.id = id;
@@ -263,15 +271,23 @@ class Pawn {
     set validateMove(args) {
         this._targetSquare = args[1]
         this._board = args[2]
+        console.log(this.position)
+        console.log(this._targetSquare)
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
             currentY = parseInt(this.position[1]);
 
-        return this.isMoveStraight([targetY, currentY, targetX, currentX])
+        console.log(this.captureMoveObj);
+
+        return this.isMoveCapture([targetY, currentY, targetX, currentX])
     }
-    get validateMove(){
+    get validateMove() {
         return this._isMoveValid
+    }
+    //update set of coordinates:
+    set updatePosition(coors) {
+        return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
     }
     // methods for generating different sets of objects, each object consinsts details about how
     // the piece should or shouldn't move on the board - these objects are assinged to variables
@@ -289,9 +305,9 @@ class Pawn {
         let obj;
         this.color === 'white'
         ?
-        obj = { x : 1, y : 1 }
+        obj = { x : [-1, 1], y : 1 }
         :
-        obj = { x : -1, y : -1 }
+        obj = { x : [-1, 1], y : -1 }
         return obj;
     }
     promoteMoveObj() {
@@ -313,8 +329,15 @@ class Pawn {
             return this._isMoveValid = false
         }
     }
-    isMoveCapture(){
-
+    isMoveCapture(args){
+        console.log(args[0] - args[1] == this.captureMoveObj.y);
+        console.log(args[2] - args[3] == this.captureMoveObj.x[0]);
+        console.log(args[2] - args[3] == this.captureMoveObj.x[1]);
+        if ((args[0] - args[1] == this.captureMoveObj.y) && (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1])) {
+            return this._isMoveValid = true
+        } else {
+            return this._isMoveValid = false
+        }
     }
     isMovePromote(){
 
