@@ -267,22 +267,19 @@ class Pawn {
     set validateMove(args) {
         this._targetSquare = args[1]
         this._board = args[2]
-        let capture = null,
-            basic = null,
-            targetX = this._targetSquare.split('')[0].charCodeAt(0),
+        let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
             currentY = parseInt(this.position[1]),
-            objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1];
-            console.log(`target piece: ${objOnTargSquare}`);
+            objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1],
+            capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
+            basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
+            obstacle = () => this.isMoveObstacle(objOnTargSquare);
 
-        capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare])
-        basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX])
-        console.log(`capture: ${capture}`);
         if (capture()) {
             return this._isMoveValid = true;
         }
-        else if (basic()) {
+        else if (basic() && obstacle()) {
             return this._isMoveValid = true;
         }
         else {
@@ -342,7 +339,9 @@ class Pawn {
         console.log(`is captured piece enemy: ${this.isCapturedPieceEnemy(args[4])}`);
         console.log(`is captured piece null: ${args[4] != null}`);
 
-        if ((args[0] - args[1] == this.captureMoveObj.y) && (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) && (this.isCapturedPieceEnemy(args[4])) && (args[4] != null)) {
+        if ((args[0] - args[1] == this.captureMoveObj.y) &&
+        (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
+        (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
             return this._isMoveValid = true
         } else {
             return this._isMoveValid = false
@@ -351,8 +350,12 @@ class Pawn {
     isMovePromote(){
 
     }
-    isMoveObstacle(){
-
+    isMoveObstacle(targPiece){
+        if(targPiece === null) {
+            return true
+        } else {
+            return false
+        }
     }
     isCapturedPieceEnemy(targPiece) {
         console.log(/[a-z]_/.test(targPiece));
