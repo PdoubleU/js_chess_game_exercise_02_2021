@@ -60,7 +60,6 @@ class Game {
                     currentColumn = this.choosenPieceID.split('')[0];
 
                 if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){
-                    console.log(`evaluation of piece: ${(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard))}`);
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // switch timer:
@@ -258,8 +257,9 @@ class Pawn {
         this._targetSquare = null;
         this._board = null;
         this._isMoveValid = null;
+        this.specialMove = true;
 
-        this.specialMoveObj = true;
+        this.specialMoveObj = this.specialMoveObj();
         this.promoteMoveObj = true;
         this.captureMoveObj = this.captureMoveObj();
         this.basicMoveObj = this.straightMoveObj();
@@ -274,15 +274,30 @@ class Pawn {
             objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1],
             capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
             basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
+            special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
             obstacle = () => this.isMoveObstacle(objOnTargSquare);
 
+        console.log(special());
+        console.log(this.specialMove);
+        console.log(this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1]);
+
         if (capture()) {
+            console.log(`capture`);
+            this.specialMove = false;
+            return this._isMoveValid = true;
+        }
+        else if (special() && this.specialMove &&  obstacle()) {
+            console.log(`special`);
+            this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (basic() && obstacle()) {
+            console.log(`basic and obstacle`);
+            this.specialMove = false;
             return this._isMoveValid = true;
         }
         else {
+            console.log(`else`);
             return this._isMoveValid = false;
         }
 
@@ -304,6 +319,15 @@ class Pawn {
         obj = { x : 0, y : 1 }
         :
         obj = { x : 0, y : -1 }
+        return obj;
+    }
+    specialMoveObj() {
+        let obj;
+        this.color === 'white'
+        ?
+        obj = { x : 0, y : 2 }
+        :
+        obj = { x : 0, y : -2 }
         return obj;
     }
     captureMoveObj() {
@@ -329,36 +353,39 @@ class Pawn {
     // infuence the returned boolean value:
     isMoveStraight(args){
         if ((args[0] - args[1] == this.basicMoveObj.y) && (args[2] - args[3] == this.basicMoveObj.x)) {
-            return this._isMoveValid = true
+            return true
         } else {
-            return this._isMoveValid = false
+            return false
+        }
+    }
+    isMoveSpecial(args){
+        if (args[0] - args[1] == this.specialMoveObj.y &&
+        args[2] - args[3] == this.specialMoveObj.x) {
+            return true
+        } else {
+            return false
         }
     }
     isMoveCapture(args){
-        console.log(args);
-        console.log(`is captured piece enemy: ${this.isCapturedPieceEnemy(args[4])}`);
-        console.log(`is captured piece null: ${args[4] != null}`);
-
         if ((args[0] - args[1] == this.captureMoveObj.y) &&
         (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
         (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
-            return this._isMoveValid = true
+            return true
         } else {
-            return this._isMoveValid = false
+            return false
         }
     }
     isMovePromote(){
 
     }
-    isMoveObstacle(targPiece){
-        if(targPiece === null) {
+    isMoveObstacle(targSquareVal){
+        if(targSquareVal === null) {
             return true
         } else {
             return false
         }
     }
     isCapturedPieceEnemy(targPiece) {
-        console.log(/[a-z]_/.test(targPiece));
         if (this.color === 'white')  {
             return (/[a-z]_/.test(targPiece))
         } else  {
