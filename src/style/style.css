@@ -23,6 +23,21 @@
 	text-align: center;
 	line-height: 3rem;
 }
+.promote_white,
+.promote_black {
+	visibility: hidden;
+	list-style: none;
+}
+.fig {
+	cursor: pointer;
+	display: inline-block;
+	border: 1px solid black;
+	width: 3rem;
+	height: 3rem;
+	background-size: 2.5rem;
+	background-position: center;
+	background-repeat: no-repeat;
+}
 .w {
 	background-color: white;
 	color: darkslategrey;

@@ -19,7 +19,6 @@ class Game {
         this.selectAndMovePiece();
         this.evaluatePieceProperties();
         this.renderPanel();
-
     }
 
     evaluatePieceProperties(id, target, board) {
@@ -31,7 +30,6 @@ class Game {
                     return this.whiteSetOfPieces[i]._isMoveValid
                 }
             }
-
         }
         else if(this.turn === 'black') {
             for (let i = 0; i< this.blackSetOfPieces.length; i++) {
@@ -51,14 +49,12 @@ class Game {
             }
             else if (this.choosenPieceID != e.target.id
                     && this.choosenPieceID != null) {
-
                 let currSquare = document.querySelector(`#${this.choosenPieceID}`),
                     currSquareClass = currSquare.classList[2],
                     targetRow = e.target.id.split('')[1],
                     targetColumn = e.target.id.split('')[0],
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0];
-
                 if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
@@ -71,12 +67,10 @@ class Game {
                     this.renderBoard();
                     // reset variable:
                     this.choosenPieceID = null;
-
                     return;
                 } else {
                     this.choosenPieceID = null;
                 }
-
             }
             else {
                 this.choosenPieceID = e.target.id;
@@ -132,7 +126,6 @@ class Game {
                             console.log('Error: index.js:89, switch statement')
                             break;
                     }
-
                 }
                 else if(/b_|k_|n_|p_|r_|q_/.test(pieceID)) {
                     switch(pieceID.match(/[a-z]_/)[0]) {
@@ -226,24 +219,23 @@ class Board {
     }
     // method called just after creating the board. This method returns html tags with elements referencing to all squares on chessboard with their proper id's:
     printBoard(){
-        let color = 'b',
-            container = document.createElement('div');
+        let color = 'b', container = document.createElement('div');
         container.classList.add('board_container')
         for (let elem in this.board) {
             let column = document.createElement('div');
-            column.classList.add('column', `${elem}`);
-            container.append(column);
+            column.classList.add('column', `${elem}`)
+            container.append(column)
             for (let i = 0; i < this.board[elem].length; i++) {
                 let square = document.createElement('div');
                 square.classList.add('square', `${color}`, `${this.board[elem][i][1]}`);
                 square.id = `${elem}${this.board[elem][i][0]}`;
                 square.textContent = `${elem}${this.board[elem][i][0]}`;
                 container.lastChild.prepend(square);
-                if (i === this.board[elem].length - 1)  {
-                    color = color;
-                } else {
-                    color = color === 'b' ? 'w' : 'b';
-                }
+                (i === this.board[elem].length - 1)
+                ?
+                color = color
+                :
+                color = color === 'b' ? 'w' : 'b';
             }
         }
         return container;
@@ -258,9 +250,9 @@ class Pawn {
         this._board = null;
         this._isMoveValid = null;
         this.specialMove = true;
+        this.enPassant = false;
 
         this.specialMoveObj = this.specialMoveObj();
-        this.promoteMoveObj = true;
         this.captureMoveObj = this.captureMoveObj();
         this.basicMoveObj = this.straightMoveObj();
     }
@@ -275,24 +267,26 @@ class Pawn {
             capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
             basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
             special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
-            obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]);
-
+            obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]),
+            promote = () => this.isMovePromote(targetY);
         //console.log(special());
         //console.log(this.specialMove);
         //console.log(this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1]);
-
         if (capture()) {
             console.log(`capture`);
+            promote();
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (special() && this.specialMove &&  obstacle()) {
             console.log(`special`);
+            promote();
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (basic() && obstacle()) {
             console.log(`basic and obstacle`);
+            promote();
             this.specialMove = false;
             return this._isMoveValid = true;
         }
@@ -339,15 +333,6 @@ class Pawn {
         obj = { x : [-1, 1], y : -1 }
         return obj;
     }
-    promoteMoveObj() {
-        let obj;
-        this.color === 'white'
-        ?
-        obj = { x : 0, y : 1 }
-        :
-        obj = { x : 0, y : -1 }
-        return obj;
-    }
     // methods, which are taking as parameters the objects set in constructor and arguments passed
     // through getter validateMove(). All methods are executed in validateMove and all together
     // infuence the returned boolean value:
@@ -367,16 +352,21 @@ class Pawn {
         }
     }
     isMoveCapture(args){
+        // to do: enPassant
         if ((args[0] - args[1] == this.captureMoveObj.y) &&
-        (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
-        (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
+            (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
+            (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
             return true
         } else {
             return false
         }
     }
-    isMovePromote(){
-
+    isMovePromote(targetRow){
+        if (this.color === 'white') {
+            (targetRow === 8) ? document.querySelector('.promote_white').style.visibility = 'visible' : void 0;
+        } else {
+            (targetRow === 1) ? document.querySelector('.promote_black').style.visibility = 'visible' : void 1;
+        }
     }
     isMoveObstacle(args){
         if (this.color === 'white') {
@@ -397,6 +387,7 @@ class Pawn {
         }
     }
     isCapturedPieceEnemy(targPiece) {
+        // to do: enPassant
         if (this.color === 'white')  {
             return (/[a-z]_/.test(targPiece))
         } else  {
