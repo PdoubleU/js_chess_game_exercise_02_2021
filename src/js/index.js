@@ -275,11 +275,11 @@ class Pawn {
             capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
             basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
             special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
-            obstacle = () => this.isMoveObstacle(objOnTargSquare);
+            obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]);
 
-        console.log(special());
-        console.log(this.specialMove);
-        console.log(this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1]);
+        //console.log(special());
+        //console.log(this.specialMove);
+        //console.log(this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1]);
 
         if (capture()) {
             console.log(`capture`);
@@ -378,11 +378,22 @@ class Pawn {
     isMovePromote(){
 
     }
-    isMoveObstacle(targSquareVal){
-        if(targSquareVal === null) {
+    isMoveObstacle(args){
+        if (this.color === 'white') {
+            for (let i = args[0] - 1; i > args[1] - 1; i--) {
+                if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
+                    return false
+                }
+            }
             return true
-        } else {
-            return false
+        }
+        else {
+            for (let i = args[0] - 1; i < args[1] - 1; i++) {
+                if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
+                    return false
+                }
+            }
+            return true
         }
     }
     isCapturedPieceEnemy(targPiece) {
