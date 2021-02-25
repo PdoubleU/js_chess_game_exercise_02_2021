@@ -27,6 +27,8 @@ class Game {
                 if (this.whiteSetOfPieces[i].id === id) {
                     this.whiteSetOfPieces[i].validateMove = [id, target, board];
                     (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
+                    console.log(`promote: ${this.whiteSetOfPieces[i].promote}`);
+                    (this.whiteSetOfPieces[i].promote === true) ? this.promotePawn(this.whiteSetOfPieces[i].color) : void 0;
                     return this.whiteSetOfPieces[i]._isMoveValid
                 }
             }
@@ -36,6 +38,8 @@ class Game {
                 if (this.blackSetOfPieces[i].id === id) {
                     this.blackSetOfPieces[i].validateMove = [id, target, board];
                     (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
+                    console.log(`promote: ${this.blackSetOfPieces[i].promote}`);
+                    (this.blackSetOfPieces[i].promote === true) ? this.promotePawn(this.blackSetOfPieces[i].color) : void 0;
                     return this.blackSetOfPieces[i]._isMoveValid
                 }
             }
@@ -77,6 +81,10 @@ class Game {
             }
         }
         ));
+    }
+    promotePawn(color) {
+        document.querySelector(`.promote_${color}`).style.visibility = 'visible'
+        document.querySelectorAll(`.fig_${color}`).forEach(elem => elem.addEventListener('click', (e) => console.log(e.target.id)));
     }
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
@@ -251,6 +259,7 @@ class Pawn {
         this._isMoveValid = null;
         this.specialMove = true;
         this.enPassant = false;
+        this.promote = false;
 
         this.specialMoveObj = this.specialMoveObj();
         this.captureMoveObj = this.captureMoveObj();
@@ -363,9 +372,13 @@ class Pawn {
     }
     isMovePromote(targetRow){
         if (this.color === 'white') {
-            (targetRow === 8) ? document.querySelector('.promote_white').style.visibility = 'visible' : void 0;
+            if (targetRow === 8) {
+                return this.promote = true
+            }
         } else {
-            (targetRow === 1) ? document.querySelector('.promote_black').style.visibility = 'visible' : void 1;
+            if (targetRow === 1) {
+                return this.promote = true
+            }
         }
     }
     isMoveObstacle(args){
