@@ -21,14 +21,14 @@ class Game {
         this.renderPanel();
     }
 
-    evaluatePieceProperties(id, target, board) {
+    evaluatePieceProperties(id, target, board, targPosition) {
         if(this.turn === 'white') {
             for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
                 if (this.whiteSetOfPieces[i].id === id) {
                     this.whiteSetOfPieces[i].validateMove = [id, target, board];
                     (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
                     console.log(`promote: ${this.whiteSetOfPieces[i].promote}`);
-                    (this.whiteSetOfPieces[i].promote === true) ? this.promotePawn(this.whiteSetOfPieces[i].color) : void 0;
+                    (this.whiteSetOfPieces[i].promote === true && this.whiteSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.whiteSetOfPieces[i], i, targPosition) : void 0;
                     return this.whiteSetOfPieces[i]._isMoveValid
                 }
             }
@@ -39,7 +39,7 @@ class Game {
                     this.blackSetOfPieces[i].validateMove = [id, target, board];
                     (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
                     console.log(`promote: ${this.blackSetOfPieces[i].promote}`);
-                    (this.blackSetOfPieces[i].promote === true) ? this.promotePawn(this.blackSetOfPieces[i].color) : void 0;
+                    (this.blackSetOfPieces[i].promote === true && this.blackSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.blackSetOfPieces[i], i, targPosition) : void 0;
                     return this.blackSetOfPieces[i]._isMoveValid
                 }
             }
@@ -59,7 +59,7 @@ class Game {
                     targetColumn = e.target.id.split('')[0],
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0];
-                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard)){
+                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow])){
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // switch timer:
@@ -82,9 +82,29 @@ class Game {
         }
         ));
     }
-    promotePawn(color) {
-        document.querySelector(`.promote_${color}`).style.visibility = 'visible'
-        document.querySelectorAll(`.fig_${color}`).forEach(elem => elem.addEventListener('click', (e) => console.log(e.target.id)));
+    promotePawn(object, index, targetPosition) {
+        console.log(`obj before change: ${object} and index: ${index}`);
+        console.log(this.whiteSetOfPieces);
+        document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
+        document.querySelectorAll(`.fig_${object.color}`)
+        .forEach(elem =>
+            elem.addEventListener('click', (e) => {
+            console.log(e.target.id);
+                if (object.color === 'white'){
+                this.whiteSetOfPieces[index] = new Rook(e.target.id, object.position, object.color)
+                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
+                this.renderBoard()
+                document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
+                console.log(this.whiteSetOfPieces[index])
+                }
+                else {
+                this.blackSetOfPieces[index] = new Rook(e.target.id, object.position, object.color)
+                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
+                this.renderBoard()
+                document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
+                console.log(this.blackSetOfPieces[index])
+                }
+            }));
     }
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
