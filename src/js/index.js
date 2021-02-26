@@ -27,7 +27,6 @@ class Game {
                 if (this.whiteSetOfPieces[i].id === id) {
                     this.whiteSetOfPieces[i].validateMove = [id, target, board];
                     (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
-                    console.log(`promote: ${this.whiteSetOfPieces[i].promote}`);
                     (this.whiteSetOfPieces[i].promote === true && this.whiteSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.whiteSetOfPieces[i], i, targPosition) : void 0;
                     return this.whiteSetOfPieces[i]._isMoveValid
                 }
@@ -38,7 +37,6 @@ class Game {
                 if (this.blackSetOfPieces[i].id === id) {
                     this.blackSetOfPieces[i].validateMove = [id, target, board];
                     (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
-                    console.log(`promote: ${this.blackSetOfPieces[i].promote}`);
                     (this.blackSetOfPieces[i].promote === true && this.blackSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.blackSetOfPieces[i], i, targPosition) : void 0;
                     return this.blackSetOfPieces[i]._isMoveValid
                 }
@@ -105,7 +103,7 @@ class Game {
                             this.whiteSetOfPieces[index] = new Queen(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
                             break;
                         default:
-                            console.log('Error: index.js:108, switch statement: method promotePawn, class Game')
+                            console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
                             break;
                         }
                     this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
@@ -127,7 +125,7 @@ class Game {
                             this.blackSetOfPieces[index] = new Queen(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
                             break;
                         default:
-                            console.log('Error: index.js:115, switch statement: method promotePawn, class Game')
+                            console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
                             break;
                         }
                     this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
@@ -182,7 +180,7 @@ class Game {
                             this.whiteSetOfPieces.push(new King(pieceID, coordinates, 'white'));
                             break;
                         default:
-                            console.log('Error: index.js:89, switch statement')
+                            console.error('Error: set of pieces wasn\'t created, check method makeSetOfPiecec in class Game');
                             break;
                     }
                 }
@@ -207,7 +205,7 @@ class Game {
                             this.blackSetOfPieces.push(new King(pieceID, coordinates, 'black'));
                             break;
                         default:
-                            console.log('Error: index.js:146, switch statement')
+                            console.error('Error: set of pieces wasn\'t created, check method makeSetOfPiecec in class Game');
                             break;
                     }
                 }
@@ -252,8 +250,8 @@ class Board {
         // if piece appears multiple times in on colour then class name has additional appendix to differ between pieces:
         for (let i = 97; i < 105; i++){
             // pawns:
-            this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
         }
         for (let i = 97; i < 105; i += 7){
             // rooks:
@@ -329,29 +327,22 @@ class Pawn {
             special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
             obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]),
             promote = () => this.isMovePromote(targetY);
-        //console.log(special());
-        //console.log(this.specialMove);
-        //console.log(this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1]);
         if (capture()) {
-            console.log(`capture`);
             promote();
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (special() && this.specialMove &&  obstacle()) {
-            console.log(`special`);
             promote();
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (basic() && obstacle()) {
-            console.log(`basic and obstacle`);
             promote();
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else {
-            console.log(`else`);
             return this._isMoveValid = false;
         }
 
@@ -458,19 +449,116 @@ class Pawn {
             return (/[A-Z]_/.test(targPiece))
         }
     }
-
-
-
 }
 class Rook {
     constructor(id, coordinates, color){
         this.id = id;
         this.color = color;
         this.position = coordinates;
-        this.move = null;
-        this.specialMove = true;
-        this.promote = true;
-        this.capture = null;
+        this._targetSquare = null;
+        this._board = null;
+        this._isMoveValid = null;
+        this.castling = true;
+
+        this.basicMoveObj = this.straightMoveObj();
+    }
+    set validateMove(args) {
+        this._targetSquare = args[1]
+        this._board = args[2]
+        let targetX = this._targetSquare.split('')[0].charCodeAt(0),
+            targetY = parseInt(this._targetSquare.split('')[1]),
+            currentX = this.position[0].charCodeAt(0),
+            currentY = parseInt(this.position[1]),
+            objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1],
+            capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
+            basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
+            special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
+            obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]);
+
+        if (basic()) {
+            return this._isMoveValid = true;
+        }
+        else {
+            return this._isMoveValid = false;
+        }
+
+    }
+    get validateMove() {
+        return this._isMoveValid
+    }
+    //update set of coordinates:
+    set updatePosition(coors) {
+        return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
+    }
+    straightMoveObj() {
+        return  { x : 0, y : 0 }
+    }
+    specialMoveObj() {
+        let obj;
+        this.color === 'white'
+        ?
+        obj = { x : 0, y : 2 }
+        :
+        obj = { x : 0, y : -2 }
+    }
+    captureMoveObj() {
+        let obj;
+        this.color === 'white'
+        ?
+        obj = { x : [-1, 1], y : 1 }
+        :
+        obj = { x : [-1, 1], y : -1 }
+    }
+    isMoveStraight(args){
+        if ((args[0] - args[1] == this.basicMoveObj.y) || (args[2] - args[3] == this.basicMoveObj.x)) {
+            return true
+        } else {
+            return false
+        }
+    }
+    isMoveSpecial(args){
+        if (args[0] - args[1] == this.specialMoveObj.y &&
+        args[2] - args[3] == this.specialMoveObj.x) {
+            return true
+        } else {
+            return false
+        }
+    }
+    isMoveCapture(args){
+        // to do: enPassant
+        if ((args[0] - args[1] == this.captureMoveObj.y) &&
+            (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
+            (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
+            return true
+        } else {
+            return false
+        }
+    }
+    isMoveObstacle(args){
+        if (this.color === 'white') {
+            for (let i = args[0] - 1; i > args[1] - 1; i--) {
+                if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
+                    return false
+                }
+            }
+            return true
+        }
+        else {
+            for (let i = args[0] - 1; i < args[1] - 1; i++) {
+                if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
+                    return false
+                }
+            }
+            return true
+        }
+    }
+    isCapturedPieceEnemy(targPiece) {
+        // to do: enPassant
+        if (this.color === 'white')  {
+            return (/[a-z]_/.test(targPiece))
+        } else  {
+            return (/[A-Z]_/.test(targPiece))
+        }
     }
 }
 class Knight {
