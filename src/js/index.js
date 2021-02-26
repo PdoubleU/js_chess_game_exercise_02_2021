@@ -47,6 +47,9 @@ class Game {
     }
     selectAndMovePiece() {
         this.listOfSquares.forEach(square => square.addEventListener('click', e => {
+            if (e.target.classList[2] === 'null' && this.choosenPieceID === null) {
+                return;
+            }
             if (this.choosenPieceID === e.target.id) {
                 this.choosenPieceID = null;
                 return;
@@ -83,28 +86,56 @@ class Game {
         ));
     }
     promotePawn(object, index, targetPosition) {
-        console.log(`obj before change: ${object} and index: ${index}`);
-        console.log(this.whiteSetOfPieces);
         document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
         document.querySelectorAll(`.fig_${object.color}`)
         .forEach(elem =>
             elem.addEventListener('click', (e) => {
-            console.log(e.target.id);
                 if (object.color === 'white'){
-                this.whiteSetOfPieces[index] = new Rook(e.target.id, object.position, object.color)
-                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
-                this.renderBoard()
-                document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
-                console.log(this.whiteSetOfPieces[index])
+                    switch(e.target.id.match(/[A-Z]_/)[0]) {
+                        case 'R_':
+                            this.whiteSetOfPieces[index] = new Rook(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        case 'N_':
+                            this.whiteSetOfPieces[index] = new Knight(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        case 'B_':
+                            this.whiteSetOfPieces[index] = new Bishop(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        case 'Q_':
+                            this.whiteSetOfPieces[index] = new Queen(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        default:
+                            console.log('Error: index.js:108, switch statement: method promotePawn, class Game')
+                            break;
+                        }
+                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
+                    this.renderBoard()
+                    document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
                 }
                 else {
-                this.blackSetOfPieces[index] = new Rook(e.target.id, object.position, object.color)
-                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
-                this.renderBoard()
-                document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
-                console.log(this.blackSetOfPieces[index])
+                    switch(e.target.id.match(/[a-z]_/)[0]) {
+                        case 'r_':
+                            this.blackSetOfPieces[index] = new Rook(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        case 'n_':
+                            this.blackSetOfPieces[index] = new Knight(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        case 'b_':
+                            this.blackSetOfPieces[index] = new Bishop(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        case 'q_':
+                            this.blackSetOfPieces[index] = new Queen(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            break;
+                        default:
+                            console.log('Error: index.js:115, switch statement: method promotePawn, class Game')
+                            break;
+                        }
+                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
+                    this.renderBoard()
+                    document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
                 }
-            }));
+            }
+            ));
     }
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
