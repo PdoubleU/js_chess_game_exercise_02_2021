@@ -47,59 +47,39 @@
 	background-position: center;
 	background-repeat: no-repeat;
 }
-.P_a,
-.P_b,
-.P_c,
-.P_d,
-.P_e,
-.P_f,
-.P_g,
-.P_h {
+.P {
 	background-image: url("../assets/pawn_white.svg");
 }
-.R_a,
-.R_h {
+.R {
 	background-image: url("../assets/rook_white.svg");
 }
-.N_b,
-.N_g {
+.N {
 	background-image: url("../assets/knight_white.svg");
 }
-.B_c,
-.B_f {
+.B {
 	background-image: url("../assets/bishop_white.svg");
 }
-.Q_d {
+.Q {
 	background-image: url("../assets/queen_white.svg");
 }
 .K_e {
 	background-image: url("../assets/king_white.svg");
 }
-.p_a,
-.p_b,
-.p_c,
-.p_d,
-.p_e,
-.p_f,
-.p_g,
-.p_h {
+.p {
 	background-image: url("../assets/pawn_black.svg");
 }
-.r_a,
-.r_h {
+.r {
 	background-image: url("../assets/rook_black.svg");
 }
-.n_b,
-.n_g {
+.n {
 	background-image: url("../assets/knight_black.svg");
 }
-.b_c,
-.b_f {
+.b {
 	background-image: url("../assets/bishop_black.svg");
 }
-.q_d {
+.q {
 	background-image: url("../assets/queen_black.svg");
 }
-.k_e {
+.k {
 	background-image: url("../assets/king_black.svg");
 }

@@ -88,49 +88,50 @@ class Game {
         document.querySelectorAll(`.fig_${object.color}`)
         .forEach(elem =>
             elem.addEventListener('click', (e) => {
+                let args = [`${e.target.id[0]}_${object.position[0]}`, object.position, object.color];
                 if (object.color === 'white'){
                     switch(e.target.id.match(/[A-Z]_/)[0]) {
                         case 'R_':
-                            this.whiteSetOfPieces[index] = new Rook(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.whiteSetOfPieces[index] = new Rook(...args);
                             break;
                         case 'N_':
-                            this.whiteSetOfPieces[index] = new Knight(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.whiteSetOfPieces[index] = new Knight(...args);
                             break;
                         case 'B_':
-                            this.whiteSetOfPieces[index] = new Bishop(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.whiteSetOfPieces[index] = new Bishop(...args)
                             break;
                         case 'Q_':
-                            this.whiteSetOfPieces[index] = new Queen(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.whiteSetOfPieces[index] = new Queen(...args)
                             break;
                         default:
                             console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
                             break;
                         }
-                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
+                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
                     this.renderBoard()
-                    document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
+                    return document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
                 }
-                else {
+                else if (object.color === 'black'){
                     switch(e.target.id.match(/[a-z]_/)[0]) {
                         case 'r_':
-                            this.blackSetOfPieces[index] = new Rook(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.blackSetOfPieces[index] = new Rook(...args)
                             break;
                         case 'n_':
-                            this.blackSetOfPieces[index] = new Knight(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.blackSetOfPieces[index] = new Knight(...args)
                             break;
                         case 'b_':
-                            this.blackSetOfPieces[index] = new Bishop(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.blackSetOfPieces[index] = new Bishop(...args)
                             break;
                         case 'q_':
-                            this.blackSetOfPieces[index] = new Queen(`${e.target.id[0]}_${object.position[0]}`, object.position, object.color)
+                            this.blackSetOfPieces[index] = new Queen(...args)
                             break;
                         default:
                             console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
                             break;
                         }
-                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = e.target.id
+                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
                     this.renderBoard()
-                    document.querySelector(`.promote_${object.color}`).style.visibility = 'hidden'
+                    document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
                 }
             }
             ));
@@ -160,24 +161,25 @@ class Game {
                     void 0;
                 }
                 else if(/B_|K_|N_|P_|R_|Q_/.test(pieceID)) {
+                    let args = [pieceID, coordinates, 'white']
                     switch(pieceID.match(/[A-Z]_/)[0]) {
                         case 'P_':
-                            this.whiteSetOfPieces.push(new Pawn(pieceID, coordinates, 'white'));
+                            this.whiteSetOfPieces.push(new Pawn(...args));
                             break;
                         case 'R_':
-                            this.whiteSetOfPieces.push(new Rook(pieceID, coordinates, 'white'));
+                            this.whiteSetOfPieces.push(new Rook(...args));
                             break;
                         case 'N_':
-                            this.whiteSetOfPieces.push(new Knight(pieceID, coordinates, 'white'));
+                            this.whiteSetOfPieces.push(new Knight(...args));
                             break;
                         case 'B_':
-                            this.whiteSetOfPieces.push(new Bishop(pieceID, coordinates, 'white'));
+                            this.whiteSetOfPieces.push(new Bishop(...args));
                             break;
                         case 'Q_':
-                            this.whiteSetOfPieces.push(new Queen(pieceID, coordinates, 'white'));
+                            this.whiteSetOfPieces.push(new Queen(...args));
                             break;
                         case 'K_':
-                            this.whiteSetOfPieces.push(new King(pieceID, coordinates, 'white'));
+                            this.whiteSetOfPieces.push(new King(...args));
                             break;
                         default:
                             console.error('Error: set of pieces wasn\'t created, check method makeSetOfPiecec in class Game');
@@ -185,24 +187,25 @@ class Game {
                     }
                 }
                 else if(/b_|k_|n_|p_|r_|q_/.test(pieceID)) {
+                    let args = [pieceID, coordinates, 'black']
                     switch(pieceID.match(/[a-z]_/)[0]) {
                         case 'p_':
-                            this.blackSetOfPieces.push(new Pawn(pieceID, coordinates, 'black'));
+                            this.blackSetOfPieces.push(new Pawn(...args));
                             break;
                         case 'r_':
-                            this.blackSetOfPieces.push(new Rook(pieceID, coordinates, 'black'));
+                            this.blackSetOfPieces.push(new Rook(...args));
                             break;
                         case 'n_':
-                            this.blackSetOfPieces.push(new Knight(pieceID, coordinates, 'black'));
+                            this.blackSetOfPieces.push(new Knight(...args));
                             break;
                         case 'b_':
-                            this.blackSetOfPieces.push(new Bishop(pieceID, coordinates, 'black'));
+                            this.blackSetOfPieces.push(new Bishop(...args));
                             break;
                         case 'q_':
-                            this.blackSetOfPieces.push(new Queen(pieceID, coordinates, 'black'));
+                            this.blackSetOfPieces.push(new Queen(...args));
                             break;
                         case 'k_':
-                            this.blackSetOfPieces.push(new King(pieceID, coordinates, 'black'));
+                            this.blackSetOfPieces.push(new King(...args));
                             break;
                         default:
                             console.error('Error: set of pieces wasn\'t created, check method makeSetOfPiecec in class Game');
@@ -250,8 +253,8 @@ class Board {
         // if piece appears multiple times in on colour then class name has additional appendix to differ between pieces:
         for (let i = 97; i < 105; i++){
             // pawns:
-            //this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
-            //this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
         }
         for (let i = 97; i < 105; i += 7){
             // rooks:
@@ -276,15 +279,16 @@ class Board {
     }
     // method called just after creating the board. This method returns html tags with elements referencing to all squares on chessboard with their proper id's:
     printBoard(){
-        let color = 'b', container = document.createElement('div');
+        let color = 'bl', container = document.createElement('div');
         container.classList.add('board_container')
         for (let elem in this.board) {
             let column = document.createElement('div');
             column.classList.add('column', `${elem}`)
             container.append(column)
             for (let i = 0; i < this.board[elem].length; i++) {
-                let square = document.createElement('div');
-                square.classList.add('square', `${color}`, `${this.board[elem][i][1]}`);
+                let square = document.createElement('div'),
+                styleClassName = (this.board[elem][i][1] !== null) ? this.board[elem][i][1].split('')[0] : 'null';
+                square.classList.add('square', `${color}`, `${this.board[elem][i][1]}`, styleClassName);
                 square.id = `${elem}${this.board[elem][i][0]}`;
                 square.textContent = `${elem}${this.board[elem][i][0]}`;
                 container.lastChild.prepend(square);
@@ -292,7 +296,7 @@ class Board {
                 ?
                 color = color
                 :
-                color = color === 'b' ? 'w' : 'b';
+                color = color === 'bl' ? 'w' : 'bl';
             }
         }
         return container;
@@ -473,9 +477,10 @@ class Rook {
             capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
             basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
             special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
-            obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]);
+            obstacle = () => this.isMoveObstacle([targetY, currentY, targetX, currentX]);
 
-        if (basic()) {
+        if (basic() && obstacle()) {
+            this.castling = false
             return this._isMoveValid = true;
         }
         else {
@@ -535,18 +540,33 @@ class Rook {
         }
     }
     isMoveObstacle(args){
-        if (this.color === 'white') {
-            for (let i = args[0] - 1; i > args[1] - 1; i--) {
-                if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
-                    return false
+        if (args[0] - args[1] == this.basicMoveObj.y) {
+            if (args[2] > args[3]) {
+                for (let i = args[2] - 1; i > args[3]; i--) {
+                    if (this._board.board[String.fromCharCode([i])][args[0] - 1][1] !== null) {
+                        return false
+                    }
+                }
+            } else if (args[2] < args[3]) {
+                for (let i = args[2] + 1; i < args[3]; i++) {
+                    if (this._board.board[String.fromCharCode([i])][args[0] - 1][1] !== null) {
+                        return false
+                    }
                 }
             }
             return true
-        }
-        else {
-            for (let i = args[0] - 1; i < args[1] - 1; i++) {
-                if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
-                    return false
+        } else if (args[2] - args[3] == this.basicMoveObj.x){
+            if (args[0] > args[1]) {
+                for (let i = args[0] - 1; i > args[1] - 1; i--) {
+                    if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
+                        return false
+                    }
+                }
+            } else if (args[0] < args[1]) {
+                for (let i = args[0]; i < args[1] - 1; i++) {
+                    if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
+                        return false
+                    }
                 }
             }
             return true
