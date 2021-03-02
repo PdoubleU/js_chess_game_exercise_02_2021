@@ -84,57 +84,59 @@ class Game {
         ));
     }
     promotePawn(object, index, targetPosition) {
+        let takeNewPiece = (e) => {
+            let args = [`${e.target.id[0]}_${object.position[0]}`, object.position, object.color];
+            if (object.color === 'white'){
+                switch(e.target.id.match(/[A-Z]_/)[0]) {
+                    case 'R_':
+                        this.whiteSetOfPieces[index] = new Rook(...args);
+                        break;
+                    case 'N_':
+                        this.whiteSetOfPieces[index] = new Knight(...args);
+                        break;
+                    case 'B_':
+                        this.whiteSetOfPieces[index] = new Bishop(...args)
+                        break;
+                    case 'Q_':
+                        this.whiteSetOfPieces[index] = new Queen(...args)
+                        break;
+                    default:
+                        console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
+                        break;
+                    }
+                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
+                this.renderBoard()
+                return document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
+            }
+            else if (object.color === 'black'){
+                switch(e.target.id.match(/[a-z]_/)[0]) {
+                    case 'r_':
+                        this.blackSetOfPieces[index] = new Rook(...args)
+                        break;
+                    case 'n_':
+                        this.blackSetOfPieces[index] = new Knight(...args)
+                        break;
+                    case 'b_':
+                        this.blackSetOfPieces[index] = new Bishop(...args)
+                        break;
+                    case 'q_':
+                        this.blackSetOfPieces[index] = new Queen(...args)
+                        break;
+                    default:
+                        console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
+                        break;
+                    }
+                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
+                this.renderBoard()
+                document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
+            }
+        }
+
         document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
         document.querySelectorAll(`.fig_${object.color}`)
         .forEach(elem =>
-            elem.addEventListener('click', (e) => {
-                let args = [`${e.target.id[0]}_${object.position[0]}`, object.position, object.color];
-                if (object.color === 'white'){
-                    switch(e.target.id.match(/[A-Z]_/)[0]) {
-                        case 'R_':
-                            this.whiteSetOfPieces[index] = new Rook(...args);
-                            break;
-                        case 'N_':
-                            this.whiteSetOfPieces[index] = new Knight(...args);
-                            break;
-                        case 'B_':
-                            this.whiteSetOfPieces[index] = new Bishop(...args)
-                            break;
-                        case 'Q_':
-                            this.whiteSetOfPieces[index] = new Queen(...args)
-                            break;
-                        default:
-                            console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
-                            break;
-                        }
-                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
-                    this.renderBoard()
-                    return document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
-                }
-                else if (object.color === 'black'){
-                    switch(e.target.id.match(/[a-z]_/)[0]) {
-                        case 'r_':
-                            this.blackSetOfPieces[index] = new Rook(...args)
-                            break;
-                        case 'n_':
-                            this.blackSetOfPieces[index] = new Knight(...args)
-                            break;
-                        case 'b_':
-                            this.blackSetOfPieces[index] = new Bishop(...args)
-                            break;
-                        case 'q_':
-                            this.blackSetOfPieces[index] = new Queen(...args)
-                            break;
-                        default:
-                            console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
-                            break;
-                        }
-                    this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
-                    this.renderBoard()
-                    document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
-                }
-            }
-            ));
+            elem.onclick = e => takeNewPiece(e)
+            );
     }
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
