@@ -44,7 +44,7 @@ class Game {
         }
     }
     selectAndMovePiece() {
-        this.listOfSquares.forEach(square => square.addEventListener('click', e => {
+        this.listOfSquares.forEach(square => square.onclick = (e) => {
             if (e.target.classList[2] === 'null' && this.choosenPieceID === null) {
                 return;
             }
@@ -81,7 +81,7 @@ class Game {
                 this.choosenPieceID = e.target.id;
             }
         }
-        ));
+        );
     }
     promotePawn(object, index, targetPosition) {
         let takeNewPiece = (e) => {
@@ -131,7 +131,6 @@ class Game {
                 document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
             }
         }
-
         document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
         document.querySelectorAll(`.fig_${object.color}`)
         .forEach(elem =>
@@ -338,7 +337,7 @@ class Pawn {
             this.specialMove = false;
             return this._isMoveValid = true;
         }
-        else if (special() && this.specialMove &&  obstacle()) {
+        else if (special() && this.specialMove && obstacle()) {
             promote();
             this.specialMove = false;
             return this._isMoveValid = true;
@@ -412,7 +411,7 @@ class Pawn {
         // to do: enPassant
         if ((args[0] - args[1] == this.captureMoveObj.y) &&
             (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
-            (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
+            this.isCapturedPieceEnemy(args[4])) {
             return true
         } else {
             return false
@@ -476,12 +475,12 @@ class Rook {
             currentX = this.position[0].charCodeAt(0),
             currentY = parseInt(this.position[1]),
             objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1],
-            capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
-            basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
-            special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
-            obstacle = () => this.isMoveObstacle([targetY, currentY, targetX, currentX]);
+            capture = this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
+            basic = this.isMoveStraight([targetY, currentY, targetX, currentX]),
+            special = this.isMoveSpecial([targetY, currentY, targetX, currentX]),
+            obstacle = this.isMoveObstacle([targetY, currentY, targetX, currentX]);
 
-        if (basic() && obstacle()) {
+        if (capture && basic && obstacle) {
             this.castling = false
             return this._isMoveValid = true;
         }
@@ -524,18 +523,10 @@ class Rook {
         }
     }
     isMoveSpecial(args){
-        if (args[0] - args[1] == this.specialMoveObj.y &&
-        args[2] - args[3] == this.specialMoveObj.x) {
-            return true
-        } else {
-            return false
-        }
+        // to do (castling)
     }
     isMoveCapture(args){
-        // to do: enPassant
-        if ((args[0] - args[1] == this.captureMoveObj.y) &&
-            (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
-            (this.isCapturedPieceEnemy(args[4])) && (args[4] !== null)) {
+        if (this.isCapturedPieceEnemy(args[4])) {
             return true
         } else {
             return false
@@ -557,9 +548,10 @@ class Rook {
                 }
             }
             return true
-        } else if (args[2] - args[3] == this.basicMoveObj.x){
+        }
+        else if (args[2] - args[3] == this.basicMoveObj.x){
             if (args[0] > args[1]) {
-                for (let i = args[0] - 1; i > args[1] - 1; i--) {
+                for (let i = args[0] - 2; i > args[1] - 1; i--) {
                     if (this._board.board[String.fromCharCode(args[2])][i][1] !== null) {
                         return false
                     }
@@ -575,10 +567,13 @@ class Rook {
         }
     }
     isCapturedPieceEnemy(targPiece) {
-        // to do: enPassant
-        if (this.color === 'white')  {
+        if (targPiece === null) {
+            return true
+        }
+        else if (this.color === 'white')  {
             return (/[a-z]_/.test(targPiece))
-        } else  {
+        }
+        else {
             return (/[A-Z]_/.test(targPiece))
         }
     }
