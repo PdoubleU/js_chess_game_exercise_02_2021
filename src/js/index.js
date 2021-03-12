@@ -303,8 +303,8 @@ class Board {
         return container;
     }
 }
-class Pawn {
-    constructor(id, coordinates, color){
+class Piece {
+    constructor(id, coordinates,color) {
         this.id = id;
         this.color = color;
         this.position = coordinates;
@@ -314,6 +314,12 @@ class Pawn {
         this.specialMove = true;
         this.enPassant = false;
         this.promote = false;
+        this.castling = true;
+    }
+}
+class Pawn extends Piece{
+    constructor(id, coordinates, color){
+        super(id, coordinates, color)
 
         this.specialMoveObj = this.specialMoveObj();
         this.captureMoveObj = this.captureMoveObj();
@@ -454,15 +460,9 @@ class Pawn {
         }
     }
 }
-class Rook {
+class Rook extends Piece{
     constructor(id, coordinates, color){
-        this.id = id;
-        this.color = color;
-        this.position = coordinates;
-        this._targetSquare = null;
-        this._board = null;
-        this._isMoveValid = null;
-        this.castling = true;
+        super(id, coordinates, color)
 
         this.basicMoveObj = this.straightMoveObj();
     }
@@ -571,14 +571,9 @@ class Rook {
         }
     }
 }
-class Knight {
+class Knight extends Piece{
     constructor(id, coordinates, color){
-        this.id = id;
-        this.color = color;
-        this.position = coordinates;
-        this._targetSquare = null;
-        this._board = null;
-        this._isMoveValid = null;
+        super(id, coordinates, color)
 
         this.basicMoveObj = this.straightMoveObj();
     }
@@ -650,14 +645,9 @@ class Knight {
         }
     }
 }
-class Bishop {
+class Bishop extends Piece{
     constructor(id, coordinates, color){
-        this.id = id;
-        this.color = color;
-        this.position = coordinates;
-        this._targetSquare = null;
-        this._board = null;
-        this._isMoveValid = null;
+        super(id, coordinates, color)
     }
     set validateMove(args) {
         this._targetSquare = args[1]
@@ -759,14 +749,9 @@ class Bishop {
         }
     }
 }
-class Queen {
+class Queen extends Piece{
     constructor(id, coordinates, color){
-        this.id = id;
-        this.color = color;
-        this.position = coordinates;
-        this._targetSquare = null;
-        this._board = null;
-        this._isMoveValid = null;
+        super(id, coordinates, color)
 
         this.basicMoveObj = this.straightMoveObj();
     }
@@ -908,15 +893,9 @@ class Queen {
         }
     }
 }
-class King {
+class King extends Piece{
     constructor(id, coordinates, color){
-        this.id = id;
-        this.color = color;
-        this.position = coordinates;
-        this._targetSquare = null;
-        this._board = null;
-        this._isMoveValid = null;
-        this.castling = true;
+        super(id, coordinates, color)
 
         this.basicMoveObj = this.straightMoveObj();
     }
