@@ -25,7 +25,7 @@ class Game {
         if(this.turn === 'white') {
             for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
                 if (this.whiteSetOfPieces[i].id === id) {
-                    this.whiteSetOfPieces[i].validateMove = [id, target, board];
+                    this.whiteSetOfPieces[i].validateMove = [target, board];
                     (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
                     (this.whiteSetOfPieces[i].promote === true && this.whiteSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.whiteSetOfPieces[i], i, targPosition) : void 0;
                     return this.whiteSetOfPieces[i]._isMoveValid
@@ -35,7 +35,7 @@ class Game {
         else if(this.turn === 'black') {
             for (let i = 0; i< this.blackSetOfPieces.length; i++) {
                 if (this.blackSetOfPieces[i].id === id) {
-                    this.blackSetOfPieces[i].validateMove = [id, target, board];
+                    this.blackSetOfPieces[i].validateMove = [target, board];
                     (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
                     (this.blackSetOfPieces[i].promote === true && this.blackSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.blackSetOfPieces[i], i, targPosition) : void 0;
                     return this.blackSetOfPieces[i]._isMoveValid
@@ -43,6 +43,7 @@ class Game {
             }
         }
     }
+
     selectAndMovePiece() {
         this.listOfSquares.forEach(square => square.onclick = (e) => {
             if (e.target.classList[2] === 'null' && this.choosenPieceID === null) {
@@ -311,23 +312,23 @@ class Piece {
         this._targetSquare = null;
         this._board = null;
         this._isMoveValid = null;
-        this.specialMove = true;
-        this.enPassant = false;
-        this.promote = false;
-        this.castling = true;
     }
 }
 class Pawn extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
+        this.specialMove = true;
+        this.enPassant = true;
+        this.promote = false;
 
         this.specialMoveObj = this.specialMoveObj();
         this.captureMoveObj = this.captureMoveObj();
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        this._targetSquare = args[1]
-        this._board = args[2]
+        console.log(args);
+        this._targetSquare = args[0]
+        this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
@@ -338,6 +339,7 @@ class Pawn extends Piece{
             special = () => this.isMoveSpecial([targetY, currentY, targetX, currentX]),
             obstacle = () => this.isMoveObstacle([targetY, currentY, currentX]),
             promote = () => this.isMovePromote(targetY);
+
         if (capture()) {
             promote();
             this.specialMove = false;
@@ -463,12 +465,13 @@ class Pawn extends Piece{
 class Rook extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
+        this.castling = true;
 
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        this._targetSquare = args[1]
-        this._board = args[2]
+        this._targetSquare = args[0]
+        this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
@@ -578,8 +581,8 @@ class Knight extends Piece{
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        this._targetSquare = args[1]
-        this._board = args[2]
+        this._targetSquare = args[0]
+        this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
@@ -650,8 +653,8 @@ class Bishop extends Piece{
         super(id, coordinates, color)
     }
     set validateMove(args) {
-        this._targetSquare = args[1]
-        this._board = args[2]
+        this._targetSquare = args[0]
+        this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
@@ -756,8 +759,8 @@ class Queen extends Piece{
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        this._targetSquare = args[1]
-        this._board = args[2]
+        this._targetSquare = args[0]
+        this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
@@ -896,12 +899,13 @@ class Queen extends Piece{
 class King extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
+        this.castling = true;
 
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        this._targetSquare = args[1]
-        this._board = args[2]
+        this._targetSquare = args[0]
+        this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
             targetY = parseInt(this._targetSquare.split('')[1]),
             currentX = this.position[0].charCodeAt(0),
@@ -917,7 +921,6 @@ class King extends Piece{
         else {
             return this._isMoveValid = false;
         }
-
     }
     get validateMove() {
         return this._isMoveValid
@@ -960,6 +963,4 @@ class King extends Piece{
     }
 }
 
-
-let newGame = new Game(15);
-let refresh = document.querySelector('.refresh').addEventListener('click', () => newGame.renderBoard())
+let newGame = document.querySelector('.refresh').addEventListener('click', () => new Game(15))
