@@ -47,6 +47,9 @@
 	background-position: center;
 	background-repeat: no-repeat;
 }
+.checked {
+	background-color: red;
+}
 .P {
 	background-image: url("../assets/pawn_white.svg");
 }
@@ -62,7 +65,7 @@
 .Q {
 	background-image: url("../assets/queen_white.svg");
 }
-.K_e {
+.K {
 	background-image: url("../assets/king_white.svg");
 }
 .p {

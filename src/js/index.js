@@ -14,11 +14,12 @@ class Game {
         this.gameHistory = [];
         this.choosenPice = null;
         this.listOfSquares = document.querySelectorAll('.square');
+        this.whiteKingChecked = false;
+        this.blackKingChecked = false;
 
         this.makeSetOfPieces();
         this.selectAndMovePiece();
         this.renderPanel();
-        this.kingChecked();
     }
 
     evaluatePieceProperties(id, target, board, targPosition) {
@@ -50,18 +51,21 @@ class Game {
                     targetColumn = e.target.id.split('')[0],
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0],
-                    color = (/[A-Z]_/.test(currSquareClass)) ? 'white' : 'black';
+                    oppositeKingColor = (/[A-Z]_/.test(currSquareClass)) ? 'black' : 'white';
                 if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow])){
-                    // switch turns depends on the current this.turn value:
-                    this.switchPlayer()
+                    // reset value of isChecked prop set for king and property white/blackKingIsChecked to default value false:
+                    this.resetKingIsChecked(this.turn)
                     // switch timer:
                         // to do
                     // update this.currentBoard:
                     this.currentBoard.board[targetColumn][targetRow - 1][1] = this.currentBoard.board[currentColumn][currentRow - 1][1];
                     this.currentBoard.board[currentColumn][currentRow - 1][1] = null;
-                    this.kingChecked('white')
                     // render updated board:
-                    this.renderBoard();
+                    this.renderBoard()
+                    // looking for check:
+                    this.kingChecked(oppositeKingColor)
+                    // switch turns depends on the current this.turn value:
+                    this.switchPlayer()
                     // reset variable:
                     this.choosenPieceID = null;
                     return;
@@ -72,22 +76,40 @@ class Game {
             else {
                 this.choosenPieceID = e.target.id;
             }
-        }
-        );
+        });
     }
     kingChecked(color) {
-        let whiteKposition = this.whiteSetOfPieces.find(elem => (elem.id === 'K_e') ? elem : void 0);
-        let blackKposition = this.blackSetOfPieces.find(elem => (elem.id === 'k_e') ? elem : void 0);
-        whiteKposition = whiteKposition.position[0] + whiteKposition.position[1];
-        blackKposition = blackKposition.position[0] + blackKposition.position[1];
-        console.log(whiteKposition);
-        console.log(blackKposition);
-        console.log(this[`${color}SetOfPieces`]);
+        let kingPosition = this[`${color}SetOfPieces`].find(elem => (elem.id === 'k_e' || elem.id === 'K_e') ? elem : void 0);
+        let king = kingPosition;
+        kingPosition = kingPosition.position[0] + kingPosition.position[1];
+        for (let i = 0; i < this[`${this.turn}SetOfPieces`].length; i++) {
+            if(this[`${this.turn}SetOfPieces`][i].id ===  'k_e' || this[`${this.turn}SetOfPieces`][i].id === 'K_e') {
+                void 1;
+            }
+            else {
+                this[`${this.turn}SetOfPieces`][i].validateMove = [kingPosition, this.currentBoard];
+                (this[`${this.turn}SetOfPieces`][i]._isMoveValid) ? this[`${color}KingChecked`] = true : void 0;
+            }
+        }
+        if (this[`${color}KingChecked`] === true ) {
+            king.checked = true;
+        }
+        if (king._isChecked === true) {
+            for (let elem in this.currentBoard.board) {
+                for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
+                    (this.currentBoard.board[elem][i][1] === king.id) ? document.getElementById(`${king.position[0] + king.position[1]}`).style.backgroundColor = 'red' : void 0;
+                }
+            }
+        }
+    }
+    resetKingIsChecked(color) {
+        let king = this[`${color}SetOfPieces`].find(elem => (elem.id === 'k_e' || elem.id === 'K_e') ? elem : void 0);
+        this[`${color}KingChecked`] = false;
+        king.checked = false;
     }
     promotePawn(object, index, targetPosition) {
         let takeNewPiece = (e) => {
             let args = [`${e.target.id[0]}_${object.position[0]}`, object.position, object.color];
-            console.log(e.target.id.match(/[A-Z]_/i)[0]);
             switch(e.target.id.match(/[A-Z]_/i)[0]) {
                 case 'r_':
                 case 'R_':
@@ -141,7 +163,6 @@ class Game {
                 let pieceID = this.currentBoard.board[elem][i][1],
                     coordinates = [elem, this.currentBoard.board[elem][i][0]],
                     color = (/[A-Z]_/.test(pieceID)) ? 'white' : 'black';
-                    console.log(pieceID);
                 if (pieceID === 'null') {
                     void 0;
                 }
@@ -621,11 +642,11 @@ class Bishop extends Piece{
             currentX = this.position[0].charCodeAt(0),
             currentY = parseInt(this.position[1]),
             objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1],
-            capture = this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
-            basic = this.isMoveStraight([targetY, currentY, targetX, currentX]),
-            obstacle = this.isMoveObstacle([targetY, currentY, targetX, currentX]);
+            capture = () => this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
+            basic = () => this.isMoveStraight([targetY, currentY, targetX, currentX]),
+            obstacle = () => this.isMoveObstacle([targetY, currentY, targetX, currentX]);
 
-        if (capture && basic && obstacle) {
+        if (capture() && basic() && obstacle()) {
             return this._isMoveValid = true;
         }
         else {
@@ -860,9 +881,13 @@ class Queen extends Piece{
 class King extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
-        this.castling = true;
+        this.castling = true,
+        this._isChecked = false;
 
         this.basicMoveObj = this.straightMoveObj();
+    }
+    set checked(boolean) {
+        this._isChecked = boolean;
     }
     set validateMove(args) {
         this._targetSquare = args[0]
@@ -885,6 +910,9 @@ class King extends Piece{
     }
     get validateMove() {
         return this._isMoveValid
+    }
+    get checked() {
+        return this._isChecked
     }
     //update set of coordinates:
     set updatePosition(coors) {
