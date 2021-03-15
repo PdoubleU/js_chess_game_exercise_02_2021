@@ -21,8 +21,8 @@ class Game {
         this.kingChecked();
     }
 
-    evaluatePieceProperties(id, target, board, targPosition, color) {
-        console.log(color);
+    evaluatePieceProperties(id, target, board, targPosition) {
+        let color = this.turn
         for (let i = 0; i< this[`${color}SetOfPieces`].length; i++) {
             if (this[`${color}SetOfPieces`][i].id === id) {
                 this[`${color}SetOfPieces`][i].validateMove = [target, board];
@@ -51,7 +51,7 @@ class Game {
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0],
                     color = (/[A-Z]_/.test(currSquareClass)) ? 'white' : 'black';
-                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow], color)){
+                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow])){
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // switch timer:
@@ -87,51 +87,32 @@ class Game {
     promotePawn(object, index, targetPosition) {
         let takeNewPiece = (e) => {
             let args = [`${e.target.id[0]}_${object.position[0]}`, object.position, object.color];
-            if (object.color === 'white'){
-                switch(e.target.id.match(/[A-Z]_/)[0]) {
-                    case 'R_':
-                        this.whiteSetOfPieces[index] = new Rook(...args);
-                        break;
-                    case 'N_':
-                        this.whiteSetOfPieces[index] = new Knight(...args);
-                        break;
-                    case 'B_':
-                        this.whiteSetOfPieces[index] = new Bishop(...args)
-                        break;
-                    case 'Q_':
-                        this.whiteSetOfPieces[index] = new Queen(...args)
-                        break;
-                    default:
-                        console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
-                        break;
-                    }
+            console.log(e.target.id.match(/[A-Z]_/i)[0]);
+            switch(e.target.id.match(/[A-Z]_/i)[0]) {
+                case 'r_':
+                case 'R_':
+                    this[`${object.color}SetOfPieces`][index] = new Rook(...args);
+                    break;
+                case 'n_':
+                case 'N_':
+                    this[`${object.color}SetOfPieces`][index] = new Knight(...args);
+                    break;
+                case 'b_':
+                case 'B_':
+                    this[`${object.color}SetOfPieces`][index] = new Bishop(...args)
+                    break;
+                case 'q_':
+                case 'Q_':
+                    this[`${object.color}SetOfPieces`][index] = new Queen(...args)
+                    break;
+                default:
+                    console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
+                    break;
+                }
                 this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
                 this.renderBoard()
                 return document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
             }
-            else if (object.color === 'black'){
-                switch(e.target.id.match(/[a-z]_/)[0]) {
-                    case 'r_':
-                        this.blackSetOfPieces[index] = new Rook(...args)
-                        break;
-                    case 'n_':
-                        this.blackSetOfPieces[index] = new Knight(...args)
-                        break;
-                    case 'b_':
-                        this.blackSetOfPieces[index] = new Bishop(...args)
-                        break;
-                    case 'q_':
-                        this.blackSetOfPieces[index] = new Queen(...args)
-                        break;
-                    default:
-                        console.error('Error: new piece wasn\'t added to set, occured in method promotePawn, class Game');
-                        break;
-                    }
-                this.currentBoard.board[targetPosition[0]][targetPosition[1] - 1][1] = args[0]
-                this.renderBoard()
-                document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
-            }
-        }
         document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
         document.querySelectorAll(`.fig_${object.color}`)
         .forEach(elem =>
@@ -158,63 +139,44 @@ class Game {
         for (let elem in this.currentBoard.board) {
             for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
                 let pieceID = this.currentBoard.board[elem][i][1],
-                    coordinates = [elem, this.currentBoard.board[elem][i][0]]
+                    coordinates = [elem, this.currentBoard.board[elem][i][0]],
+                    color = (/[A-Z]_/.test(pieceID)) ? 'white' : 'black';
+                    console.log(pieceID);
                 if (pieceID === 'null') {
                     void 0;
                 }
-                else if(/B_|K_|N_|P_|R_|Q_/.test(pieceID)) {
-                    let args = [pieceID, coordinates, 'white']
-                    switch(pieceID.match(/[A-Z]_/)[0]) {
+                else if(/[A-Z]_/i.test(pieceID)) {
+                    let args = [pieceID, coordinates, color]
+                    switch(pieceID.match(/[A-Z]_/i)[0]) {
                         case 'P_':
-                            this.whiteSetOfPieces.push(new Pawn(...args));
+                        case 'p_':
+                            this[`${color}SetOfPieces`].push(new Pawn(...args));
                             break;
                         case 'R_':
-                            this.whiteSetOfPieces.push(new Rook(...args));
+                        case 'r_':
+                            this[`${color}SetOfPieces`].push(new Rook(...args));
                             break;
                         case 'N_':
-                            this.whiteSetOfPieces.push(new Knight(...args));
+                        case 'n_':
+                            this[`${color}SetOfPieces`].push(new Knight(...args));
                             break;
                         case 'B_':
-                            this.whiteSetOfPieces.push(new Bishop(...args));
+                        case 'b_':
+                            this[`${color}SetOfPieces`].push(new Bishop(...args));
                             break;
                         case 'Q_':
-                            this.whiteSetOfPieces.push(new Queen(...args));
+                        case 'q_':
+                            this[`${color}SetOfPieces`].push(new Queen(...args));
                             break;
                         case 'K_':
-                            this.whiteSetOfPieces.push(new King(...args));
-                            break;
-                        default:
-                            console.error('Error: set of pieces wasn\'t created, check method makeSetOfPiecec in class Game');
-                            break;
-                    }
-                }
-                else if(/b_|k_|n_|p_|r_|q_/.test(pieceID)) {
-                    let args = [pieceID, coordinates, 'black']
-                    switch(pieceID.match(/[a-z]_/)[0]) {
-                        case 'p_':
-                            this.blackSetOfPieces.push(new Pawn(...args));
-                            break;
-                        case 'r_':
-                            this.blackSetOfPieces.push(new Rook(...args));
-                            break;
-                        case 'n_':
-                            this.blackSetOfPieces.push(new Knight(...args));
-                            break;
-                        case 'b_':
-                            this.blackSetOfPieces.push(new Bishop(...args));
-                            break;
-                        case 'q_':
-                            this.blackSetOfPieces.push(new Queen(...args));
-                            break;
                         case 'k_':
-                            this.blackSetOfPieces.push(new King(...args));
+                            this[`${color}SetOfPieces`].push(new King(...args));
                             break;
                         default:
                             console.error('Error: set of pieces wasn\'t created, check method makeSetOfPiecec in class Game');
                             break;
                     }
                 }
-
             }
         }
     }
