@@ -17,29 +17,18 @@ class Game {
 
         this.makeSetOfPieces();
         this.selectAndMovePiece();
-        this.evaluatePieceProperties();
         this.renderPanel();
+        this.kingChecked();
     }
 
-    evaluatePieceProperties(id, target, board, targPosition) {
-        if(this.turn === 'white') {
-            for (let i = 0; i< this.whiteSetOfPieces.length; i++) {
-                if (this.whiteSetOfPieces[i].id === id) {
-                    this.whiteSetOfPieces[i].validateMove = [target, board];
-                    (this.whiteSetOfPieces[i]._isMoveValid) ? this.whiteSetOfPieces[i].updatePosition = target : void 0;
-                    (this.whiteSetOfPieces[i].promote === true && this.whiteSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.whiteSetOfPieces[i], i, targPosition) : void 0;
-                    return this.whiteSetOfPieces[i]._isMoveValid
-                }
-            }
-        }
-        else if(this.turn === 'black') {
-            for (let i = 0; i< this.blackSetOfPieces.length; i++) {
-                if (this.blackSetOfPieces[i].id === id) {
-                    this.blackSetOfPieces[i].validateMove = [target, board];
-                    (this.blackSetOfPieces[i]._isMoveValid) ? this.blackSetOfPieces[i].updatePosition = target : void 0;
-                    (this.blackSetOfPieces[i].promote === true && this.blackSetOfPieces[i]._isMoveValid) ? this.promotePawn(this.blackSetOfPieces[i], i, targPosition) : void 0;
-                    return this.blackSetOfPieces[i]._isMoveValid
-                }
+    evaluatePieceProperties(id, target, board, targPosition, color) {
+        console.log(color);
+        for (let i = 0; i< this[`${color}SetOfPieces`].length; i++) {
+            if (this[`${color}SetOfPieces`][i].id === id) {
+                this[`${color}SetOfPieces`][i].validateMove = [target, board];
+                (this[`${color}SetOfPieces`][i]._isMoveValid) ? this[`${color}SetOfPieces`][i].updatePosition = target : void 0;
+                (this[`${color}SetOfPieces`][i].promote === true && this[`${color}SetOfPieces`][i]._isMoveValid) ? this.promotePawn(this[`${color}SetOfPieces`][i], i, targPosition) : void 0;
+                return this[`${color}SetOfPieces`][i]._isMoveValid
             }
         }
     }
@@ -60,8 +49,9 @@ class Game {
                     targetRow = e.target.id.split('')[1],
                     targetColumn = e.target.id.split('')[0],
                     currentRow = this.choosenPieceID.split('')[1],
-                    currentColumn = this.choosenPieceID.split('')[0];
-                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow])){
+                    currentColumn = this.choosenPieceID.split('')[0],
+                    color = (/[A-Z]_/.test(currSquareClass)) ? 'white' : 'black';
+                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow], color)){
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // switch timer:
@@ -69,6 +59,7 @@ class Game {
                     // update this.currentBoard:
                     this.currentBoard.board[targetColumn][targetRow - 1][1] = this.currentBoard.board[currentColumn][currentRow - 1][1];
                     this.currentBoard.board[currentColumn][currentRow - 1][1] = null;
+                    this.kingChecked('white')
                     // render updated board:
                     this.renderBoard();
                     // reset variable:
@@ -83,6 +74,15 @@ class Game {
             }
         }
         );
+    }
+    kingChecked(color) {
+        let whiteKposition = this.whiteSetOfPieces.find(elem => (elem.id === 'K_e') ? elem : void 0);
+        let blackKposition = this.blackSetOfPieces.find(elem => (elem.id === 'k_e') ? elem : void 0);
+        whiteKposition = whiteKposition.position[0] + whiteKposition.position[1];
+        blackKposition = blackKposition.position[0] + blackKposition.position[1];
+        console.log(whiteKposition);
+        console.log(blackKposition);
+        console.log(this[`${color}SetOfPieces`]);
     }
     promotePawn(object, index, targetPosition) {
         let takeNewPiece = (e) => {
@@ -326,7 +326,6 @@ class Pawn extends Piece{
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        console.log(args);
         this._targetSquare = args[0]
         this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
