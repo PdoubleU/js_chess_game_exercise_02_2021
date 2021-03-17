@@ -47,11 +47,13 @@ class Game {
                     && this.choosenPieceID != null) {
                 let currSquare = document.querySelector(`#${this.choosenPieceID}`),
                     currSquareClass = currSquare.classList[2],
+                    targetSquare = document.querySelector(`#${e.target.id}`),
+                    targetSquareClass = targetSquare.classList[2],
                     targetRow = e.target.id.split('')[1],
                     targetColumn = e.target.id.split('')[0],
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0],
-                    oppositeKingColor = (/[A-Z]_/.test(currSquareClass)) ? 'black' : 'white';
+                    oppositePlayer = (/[A-Z]_/.test(currSquareClass)) ? 'black' : 'white';
                 if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow])){
                     // reset value of isChecked prop set for king and property white/blackKingIsChecked to default value false:
                     this.resetKingIsChecked(this.turn)
@@ -60,10 +62,12 @@ class Game {
                     // update this.currentBoard:
                     this.currentBoard.board[targetColumn][targetRow - 1][1] = this.currentBoard.board[currentColumn][currentRow - 1][1];
                     this.currentBoard.board[currentColumn][currentRow - 1][1] = null;
+                    // remove captured piece from the correct set of pieces, it has to be done before rendering new board!:
+                    this.rmItemFromSetOfPieces(targetSquareClass, oppositePlayer)
                     // render updated board:
                     this.renderBoard()
                     // looking for check:
-                    this.kingChecked(oppositeKingColor)
+                    this.kingChecked(oppositePlayer)
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // reset variable:
@@ -106,6 +110,11 @@ class Game {
         let king = this[`${color}SetOfPieces`].find(elem => (elem.id === 'k_e' || elem.id === 'K_e') ? elem : void 0);
         this[`${color}KingChecked`] = false;
         king.checked = false;
+    }
+    rmItemFromSetOfPieces(id, color) {
+        if (id === null) { return }
+        let tempArray = this[`${color}SetOfPieces`].filter(elem => (elem.id !== id) ? elem : void 1);
+        this[`${color}SetOfPieces`] = tempArray;
     }
     promotePawn(object, index, targetPosition) {
         let takeNewPiece = (e) => {
