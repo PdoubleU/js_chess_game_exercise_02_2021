@@ -247,8 +247,8 @@ class Board {
         // if piece appears multiple times in on colour then class name has additional appendix to differ between pieces:
         for (let i = 97; i < 105; i++){
             // pawns:
-            this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
         }
         for (let i = 97; i < 105; i += 7){
             // rooks:
@@ -257,17 +257,17 @@ class Board {
         }
         for (let i = 98; i < 104; i += 5){
             // knights:
-            this.board[String.fromCharCode(i)][0][1] = `N_${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][7][1] = `n_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][0][1] = `N_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][7][1] = `n_${String.fromCharCode(i)}`;
         }
         for (let i = 99; i < 103; i += 3){
             // bishops:
-            this.board[String.fromCharCode(i)][0][1] = `B_${String.fromCharCode(i)}`;
-            this.board[String.fromCharCode(i)][7][1] = `b_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][0][1] = `B_${String.fromCharCode(i)}`;
+            //this.board[String.fromCharCode(i)][7][1] = `b_${String.fromCharCode(i)}`;
         }
         // kings and qeens:
-        this.board[String.fromCharCode(100)][0][1] = `Q_d`;
-        this.board[String.fromCharCode(100)][7][1] = `q_d`;
+        //this.board[String.fromCharCode(100)][0][1] = `Q_d`;
+        //this.board[String.fromCharCode(100)][7][1] = `q_d`;
         this.board[String.fromCharCode(101)][0][1] = `K_e`;
         this.board[String.fromCharCode(101)][7][1] = `k_e`;
     }
@@ -456,9 +456,17 @@ class Pawn extends Piece{
 class Rook extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
-        this.castling = true;
+        this._castling = true;
 
         this.basicMoveObj = this.straightMoveObj();
+    }
+    //update set of coordinates:
+    set updatePosition(coors) {
+        return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
+    }
+    set castling(boolean) {
+        console.log(`this castling set to false rook`);
+        this._castling = boolean;
     }
     set validateMove(args) {
         this._targetSquare = args[0]
@@ -470,12 +478,10 @@ class Rook extends Piece{
             objOnTargSquare = this._board.board[this._targetSquare.split('')[0]][parseInt(this._targetSquare.split('')[1] - 1)][1],
             capture = this.isMoveCapture([targetY, currentY, targetX, currentX, objOnTargSquare]),
             basic = this.isMoveStraight([targetY, currentY, targetX, currentX]),
-            // to do (castling)
-            special = this.isMoveSpecial([targetY, currentY, targetX, currentX]),
             obstacle = this.isMoveObstacle([targetY, currentY, targetX, currentX]);
 
         if (capture && basic && obstacle) {
-            this.castling = false
+            this.castling = false;
             return this._isMoveValid = true;
         }
         else {
@@ -486,21 +492,11 @@ class Rook extends Piece{
     get validateMove() {
         return this._isMoveValid
     }
-    //update set of coordinates:
-    set updatePosition(coors) {
-        return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
+    get castling() {
+        return this._castling
     }
     straightMoveObj() {
         return  { x : 0, y : 0 }
-    }
-    specialMoveObj() {
-        // to do (castling)
-        let obj;
-        this.color === 'white'
-        ?
-        obj = { x : 0, y : 2 }
-        :
-        obj = { x : 0, y : -2 }
     }
     isMoveStraight(args){
         if ((args[0] - args[1] == this.basicMoveObj.y) || (args[2] - args[3] == this.basicMoveObj.x)) {
@@ -508,9 +504,6 @@ class Rook extends Piece{
         } else {
             return false
         }
-    }
-    isMoveSpecial(args){
-        // to do (castling)
     }
     isMoveCapture(args){
         if (this.isCapturedPieceEnemy(args[4])) {
@@ -890,13 +883,21 @@ class Queen extends Piece{
 class King extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
-        this.castling = true,
+        this._castling = true,
         this._isChecked = false;
 
         this.basicMoveObj = this.straightMoveObj();
     }
+    //update set of coordinates:
+    set updatePosition(coors) {
+        return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
+    }
+    set castling(boolean) {
+        console.log(`this castling set to false`);
+        return this._castling = boolean
+    }
     set checked(boolean) {
-        this._isChecked = boolean;
+        this._isChecked = boolean
     }
     set validateMove(args) {
         this._targetSquare = args[0]
@@ -923,9 +924,8 @@ class King extends Piece{
     get checked() {
         return this._isChecked
     }
-    //update set of coordinates:
-    set updatePosition(coors) {
-        return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
+    get castling() {
+        return this._castling
     }
     straightMoveObj() {
         return  { x : 0, y : 0 }
