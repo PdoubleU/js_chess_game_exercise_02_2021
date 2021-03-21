@@ -1,18 +1,18 @@
 class Game {
     constructor(gameTime) {
         this.gameTime = gameTime;
-        this.whiteSetOfPieces = [];
-        this.blackSetOfPieces = [];
+        this.whiteSetOfPieces = new Array();
+        this.blackSetOfPieces = new Array();
         this.whiteTime = null;
         this.blackTime = null;
         this.turn = 'white';
-        this.capturedWhite = [];
-        this.capturedBlack = [];
+        this.capturedWhite = new Array();
+        this.capturedBlack = new Array();
         this.currentBoard = new Board;
         this.root = document.querySelector('#root');
         this.renderedBoard =  this.renderBoard();
-        this.gameHistory = [];
-        this.choosenPice = null;
+        this.gameHistory = new Array();
+        this.choosenPieceID = null;
         this.listOfSquares = document.querySelectorAll('.square');
         this.whiteKingChecked = false;
         this.blackKingChecked = false;
@@ -21,19 +21,31 @@ class Game {
         this.selectAndMovePiece();
         this.renderPanel();
     }
-
-    evaluatePieceProperties(id, target, board, targPosition) {
-        let color = this.turn
-        for (let i = 0; i< this[`${color}SetOfPieces`].length; i++) {
-            if (this[`${color}SetOfPieces`][i].id === id) {
-                this[`${color}SetOfPieces`][i].validateMove = [target, board];
-                (this[`${color}SetOfPieces`][i]._isMoveValid) ? this[`${color}SetOfPieces`][i].updatePosition = target : void 0;
-                (this[`${color}SetOfPieces`][i].promote === true && this[`${color}SetOfPieces`][i]._isMoveValid) ? this.promotePawn(this[`${color}SetOfPieces`][i], i, targPosition) : void 0;
-                return this[`${color}SetOfPieces`][i]._isMoveValid
+    evaluatePieceProperties(id, target, board, targPosition, currPosition) {
+        // if choosen piece id is equal to value of default king position and target square is equal to value of default castling move for king, then execute castling() method:
+        if ((this.choosenPieceID === 'e1' ||
+        this.choosenPieceID === 'e8') &&
+        (target === 'c1' || target === 'g1' ||
+        target === 'c8' || target === 'g8')) {
+            console.log(`exec castling`);
+            this.castling(this.turn, target, board)
+        }
+        else {
+            let piece = this[`${this.turn}SetOfPieces`].find(elem => elem.id === id);
+            if (piece) {
+                piece.validateMove = [target, board];
+                (piece._isMoveValid) ? piece.updatePosition = target : void 0;
+                (piece.promote === true && piece._isMoveValid) ? this.promotePawn(piece, i, targPosition) : void 0
+                if (piece._isMoveValid) { 
+                    // update current board after valid move:
+                    this.currentBoard.board[targPosition[0]][targPosition[1] - 1][1] = this.currentBoard.board[currPosition[0]][currPosition[1] - 1][1];
+                    this.currentBoard.board[currPosition[0]][currPosition[1] - 1][1] = null;
+                }
+                return piece._isMoveValid
             }
+            return false
         }
     }
-
     selectAndMovePiece() {
         this.listOfSquares.forEach(square => square.onclick = (e) => {
             if (e.target.classList[2] === 'null' && this.choosenPieceID === null) {
@@ -53,15 +65,13 @@ class Game {
                     targetColumn = e.target.id.split('')[0],
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0],
-                    oppositePlayer = (/[A-Z]_/.test(currSquareClass)) ? 'black' : 'white';
-                if(this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow])){
+                    oppositePlayer = (/[A-Z]_/.test(currSquareClass)) ? 'black' : 'white',
+                    evaluatePieceProps = () => this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow], [currentColumn, currentRow]);
+                if(evaluatePieceProps()){
                     // reset value of isChecked prop set for king and property white/blackKingIsChecked to default value false:
                     this.resetKingIsChecked(this.turn)
                     // switch timer:
                         // to do
-                    // update this.currentBoard:
-                    this.currentBoard.board[targetColumn][targetRow - 1][1] = this.currentBoard.board[currentColumn][currentRow - 1][1];
-                    this.currentBoard.board[currentColumn][currentRow - 1][1] = null;
                     // remove captured piece from the correct set of pieces, it has to be done before rendering new board!:
                     this.rmItemFromSetOfPieces(targetSquareClass, oppositePlayer)
                     // render updated board:
@@ -150,6 +160,36 @@ class Game {
             elem.onclick = e => takeNewPiece(e)
             );
     }
+    castling(color, targetSquare, board) {
+        console.log(`color: ${color} \ntargetSqu: ${targetSquare}`);
+        console.log(board);
+        let king = this[`${color}SetOfPieces`].find(elem => /[k]_/i.test(elem.id));
+        let rookQSide = this[`${color}SetOfPieces`].find(elem => /[r]_a/i.test(elem.id))
+        let rookKSide = this[`${color}SetOfPieces`].find(elem => /[r]_h/i.test(elem.id));
+        if (!king._castling) {
+            console.log(`king castling false!`);
+            return false;
+        }
+        if (/c8|c1/i.test(targetSquare) && rookQSide._castling) {
+            console.log(board.board);
+            console.log(targetSquare);
+        }
+        if (/g8|g1/i.test(targetSquare) && rookKSide._castling) {
+            console.log(targetSquare);
+            if (!board.board['f'][0][1] === null ||
+                !board.board['g'][0][1] === null) {
+                    return false;
+                }
+            else {
+                console.log(`good for castling`);
+            }
+        }
+
+        console.log(king._castling, rookQSide._castling, rookKSide._castling);
+
+
+
+    }
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
         if(document.querySelector('.board_container')) {
@@ -221,7 +261,6 @@ class Game {
         this.renderPanel()
     }
 }
-
 class Board {
     constructor(){
         // below define rows and  first column name represented as integer 97 which is refering to lower case letter 'a' in asci:
@@ -247,8 +286,8 @@ class Board {
         // if piece appears multiple times in on colour then class name has additional appendix to differ between pieces:
         for (let i = 97; i < 105; i++){
             // pawns:
-            //this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
-            //this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][1][1] = `P_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][6][1] = `p_${String.fromCharCode(i)}`;
         }
         for (let i = 97; i < 105; i += 7){
             // rooks:
@@ -257,17 +296,17 @@ class Board {
         }
         for (let i = 98; i < 104; i += 5){
             // knights:
-            //this.board[String.fromCharCode(i)][0][1] = `N_${String.fromCharCode(i)}`;
-            //this.board[String.fromCharCode(i)][7][1] = `n_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][0][1] = `N_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `n_${String.fromCharCode(i)}`;
         }
         for (let i = 99; i < 103; i += 3){
             // bishops:
-            //this.board[String.fromCharCode(i)][0][1] = `B_${String.fromCharCode(i)}`;
-            //this.board[String.fromCharCode(i)][7][1] = `b_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][0][1] = `B_${String.fromCharCode(i)}`;
+            this.board[String.fromCharCode(i)][7][1] = `b_${String.fromCharCode(i)}`;
         }
         // kings and qeens:
-        //this.board[String.fromCharCode(100)][0][1] = `Q_d`;
-        //this.board[String.fromCharCode(100)][7][1] = `q_d`;
+        this.board[String.fromCharCode(100)][0][1] = `Q_d`;
+        this.board[String.fromCharCode(100)][7][1] = `q_d`;
         this.board[String.fromCharCode(101)][0][1] = `K_e`;
         this.board[String.fromCharCode(101)][7][1] = `k_e`;
     }
@@ -931,7 +970,7 @@ class King extends Piece{
         return  { x : 0, y : 0 }
     }
     isMoveStraight(args){
-        if (Math.abs(args[0] - args[1] > 1) || Math.abs(args[2] - args[3] > 1)) {
+        if (Math.abs(args[0] - args[1]) > 1 || Math.abs(args[2] - args[3]) > 1) {
             return false
         }
         else if (Math.abs(args[0] - args[1]) === Math.abs(args[2] - args[3]) ||
