@@ -3,7 +3,7 @@
 ![GitHub Logo](/images/chess.bmp)
 
 
-[Lets go to live preview](starcab.wroclaw.pl)
+[Lets play a game](starcab.wroclaw.pl)
 
 
 This old and very popular boardgame, with Indian and Persian origin, has changed over centuries. Today we know moves as 'en passant' or pawn's 'promotions' - both weren't present in the past. The project allows two humans to play on the computer in a browser. This project is still in progress, however, you can play a game (for now the 'en passant' and detecting forbidden move when the king can be checked are unable).
