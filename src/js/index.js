@@ -11,7 +11,6 @@ class Game {
         this.currentBoard = new Board;
         this.root = document.querySelector('#root');
         this.renderedBoard =  this.renderBoard();
-        this.gameHistory = new Array();
         this.choosenPieceID = null;
         this.listOfSquares = document.querySelectorAll('.square');
         this.whiteKingChecked = false;
@@ -23,20 +22,29 @@ class Game {
     }
     evaluatePieceProperties(id, target, board, targPosition, currPosition) {
         // if choosen piece id is equal to value of default king position and target square is equal to value of default castling move for king, then execute castling() method:
-        if ((this.choosenPieceID === 'e1' ||
-        this.choosenPieceID === 'e8') &&
-        (target === 'c1' || target === 'g1' ||
-        target === 'c8' || target === 'g8')) {
-            console.log(`exec castling`);
-            this.castling(this.turn, target, board)
+        if ((this.choosenPieceID === 'e1' || this.choosenPieceID === 'e8') &&
+            (target === 'c1' || target === 'g1' || target === 'c8' || target === 'g8')) {
+            let result = this.castling(this.turn, target, board)
+            if (!result[0]) {
+                return false
+            }
+            else if (result[0] === true) {
+                // update current board after valid castling:
+                this.currentBoard.board[targPosition[0]][targPosition[1] - 1][1] = this.currentBoard.board[currPosition[0]][currPosition[1] - 1][1];
+                this.currentBoard.board[result[1].rookTarg[0]][result[1].rookTarg[1] - 1][1] = this.currentBoard.board[result[1].rookCurr[0]][result[1].rookCurr[1] - 1][1];
+                this.currentBoard.board[currPosition[0]][currPosition[1] - 1][1] = null;
+                this.currentBoard.board[result[1].rookCurr[0]][result[1].rookCurr[1] - 1][1] = null
+                return true
+            }
         }
         else {
             let piece = this[`${this.turn}SetOfPieces`].find(elem => elem.id === id);
+            let index = this[`${this.turn}SetOfPieces`].findIndex(elem => elem.id === id);
             if (piece) {
                 piece.validateMove = [target, board];
                 (piece._isMoveValid) ? piece.updatePosition = target : void 0;
-                (piece.promote === true && piece._isMoveValid) ? this.promotePawn(piece, i, targPosition) : void 0
-                if (piece._isMoveValid) { 
+                (piece.promote === true && piece._isMoveValid) ? this.promotePawn(piece, index, targPosition) : void 0
+                if (piece._isMoveValid) {
                     // update current board after valid move:
                     this.currentBoard.board[targPosition[0]][targPosition[1] - 1][1] = this.currentBoard.board[currPosition[0]][currPosition[1] - 1][1];
                     this.currentBoard.board[currPosition[0]][currPosition[1] - 1][1] = null;
@@ -127,6 +135,9 @@ class Game {
         this[`${color}SetOfPieces`] = tempArray;
     }
     promotePawn(object, index, targetPosition) {
+        document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
+        document.querySelectorAll(`.fig_${object.color}`)
+        .forEach(elem => elem.onclick = e => takeNewPiece(e));
         let takeNewPiece = (e) => {
             let args = [`${e.target.id[0]}_${object.position[0]}`, object.position, object.color];
             switch(e.target.id.match(/[A-Z]_/i)[0]) {
@@ -154,41 +165,64 @@ class Game {
                 this.renderBoard()
                 return document.querySelector(`.promote_${args[2]}`).style.visibility = 'hidden'
             }
-        document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
-        document.querySelectorAll(`.fig_${object.color}`)
-        .forEach(elem =>
-            elem.onclick = e => takeNewPiece(e)
-            );
     }
     castling(color, targetSquare, board) {
-        console.log(`color: ${color} \ntargetSqu: ${targetSquare}`);
-        console.log(board);
+        let validation = null;
+        let positions = {rookCurr: null, rookTarg: null}
         let king = this[`${color}SetOfPieces`].find(elem => /[k]_/i.test(elem.id));
         let rookQSide = this[`${color}SetOfPieces`].find(elem => /[r]_a/i.test(elem.id))
         let rookKSide = this[`${color}SetOfPieces`].find(elem => /[r]_h/i.test(elem.id));
         if (!king._castling) {
-            console.log(`king castling false!`);
-            return false;
+            validation = false
+            return [validation, positions]
         }
         if (/c8|c1/i.test(targetSquare) && rookQSide._castling) {
-            console.log(board.board);
-            console.log(targetSquare);
+            if (color === 'white') {
+                if (board.board['c'][0][1] !== null ||
+                    board.board['d'][0][1] !== null) {
+                        validation = false
+                        return [validation, positions]
+                }
+            }
+            else {
+                if (board.board['c'][7][1] !== null ||
+                    board.board['d'][7][1] !== null) {
+                        validation = false
+                        return [validation, positions]
+                    }
+            }
+            positions.rookCurr = rookQSide.position
+            positions.rookTarg = (color === 'white') ? ['d', 1] : ['d', 8]
+            king.updatePosition = targetSquare
+            rookQSide.updatePosition = (color === 'white') ? 'd1' : 'd8'
+            rookQSide._castling = false
+            king._castling = false
+            validation = true
         }
         if (/g8|g1/i.test(targetSquare) && rookKSide._castling) {
-            console.log(targetSquare);
-            if (!board.board['f'][0][1] === null ||
-                !board.board['g'][0][1] === null) {
-                    return false;
+            if (color === 'white') {
+                if (board.board['f'][0][1] !== null ||
+                    board.board['g'][0][1] !== null) {
+                        validation = false
+                        return [validation, positions]
                 }
-            else {
-                console.log(`good for castling`);
             }
+            else {
+                if (board.board['f'][7][1] !== null ||
+                    board.board['g'][7][1] !== null) {
+                        validation = false
+                        return [validation, positions]
+                    }
+            }
+            positions.rookCurr = rookKSide.position
+            positions.rookTarg = (color === 'white') ? ['f', 1] : ['f', 8]
+            king.updatePosition = targetSquare
+            rookKSide.updatePosition = (color === 'white') ? 'f1' : 'f8'
+            rookKSide._castling = false
+            king._castling = false
+            validation = true
         }
-
-        console.log(king._castling, rookQSide._castling, rookKSide._castling);
-
-
-
+        return [validation, positions];
     }
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
@@ -206,7 +240,7 @@ class Game {
         document.querySelector('.player').innerHTML = this.turn;
     }
     makeSetOfPieces() {
-        // method iterate through initialy set board and fill two arrays with newly created objects which unique names and coordinates on the board:
+        // method iterate through initialy set board and fill two arrays with newly created objects with unique names and coordinates on the board:
         for (let elem in this.currentBoard.board) {
             for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
                 let pieceID = this.currentBoard.board[elem][i][1],
@@ -253,9 +287,6 @@ class Game {
     switchTimer() {
         //to do
     }
-    addBoardStateToHistory(){
-        //to do
-    }
     switchPlayer() {
         this.turn = this.turn === 'white' ? 'black' : 'white';
         this.renderPanel()
@@ -263,7 +294,7 @@ class Game {
 }
 class Board {
     constructor(){
-        // below define rows and  first column name represented as integer 97 which is refering to lower case letter 'a' in asci:
+        // below define the rows and a first column's names represented as integer 97 which is refering to lower case letter 'a' in ASCI:
         this.rows = 8;
         this.firstColumn = 97;
         // property board represents the newly created board thanks to method createBoard()
@@ -310,7 +341,7 @@ class Board {
         this.board[String.fromCharCode(101)][0][1] = `K_e`;
         this.board[String.fromCharCode(101)][7][1] = `k_e`;
     }
-    // method called just after creating the board. This method returns html tags with elements referencing to all squares on chessboard with their proper id's:
+    // t his method returns html tags with elements referencing to all squares on chessboard with their proper id's:
     printBoard(){
         let color = 'bl', container = document.createElement('div');
         container.classList.add('board_container')
@@ -323,7 +354,6 @@ class Board {
                 styleClassName = (this.board[elem][i][1] !== null) ? this.board[elem][i][1].split('')[0] : 'null';
                 square.classList.add('square', `${color}`, `${this.board[elem][i][1]}`, styleClassName);
                 square.id = `${elem}${this.board[elem][i][0]}`;
-                square.textContent = `${elem}${this.board[elem][i][0]}`;
                 container.lastChild.prepend(square);
                 (i === this.board[elem].length - 1)
                 ?
@@ -336,7 +366,7 @@ class Board {
     }
 }
 class Piece {
-    constructor(id, coordinates,color) {
+    constructor(id, coordinates, color) {
         this.id = id;
         this.color = color;
         this.position = coordinates;
@@ -396,9 +426,9 @@ class Pawn extends Piece{
     set updatePosition(coors) {
         return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
     }
-    // methods for generating different sets of objects, each object consinsts details about how
+    // methods generates different sets of objects; each object consists details about how
     // the piece should or shouldn't move on the board - these objects are assinged to variables
-    // in constructor:
+    // in the constructor:
     straightMoveObj() {
         let obj;
         this.color === 'white'
@@ -426,7 +456,7 @@ class Pawn extends Piece{
         obj = { x : [-1, 1], y : -1 }
         return obj;
     }
-    // methods, which are taking as parameters the objects set in constructor and arguments passed
+    // methods takes as parameters the object sets in constructor and arguments passed
     // through getter validateMove(). All methods are executed in validateMove and all together
     // infuence the returned boolean value:
     isMoveStraight(args){
@@ -504,7 +534,6 @@ class Rook extends Piece{
         return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
     }
     set castling(boolean) {
-        console.log(`this castling set to false rook`);
         this._castling = boolean;
     }
     set validateMove(args) {
@@ -631,14 +660,8 @@ class Knight extends Piece{
     }
     straightMoveObj() {
         return  {
-                    setOne: {
-                            x: 1,
-                            y: 2
-                    },
-                    setTwo: {
-                            x: 2,
-                            y: 1
-                    }
+                    setOne: { x: 1, y: 2 },
+                    setTwo: { x: 2, y: 1 }
                 }
     }
     isMoveStraight(args){
@@ -688,10 +711,10 @@ class Bishop extends Piece{
             obstacle = () => this.isMoveObstacle([targetY, currentY, targetX, currentX]);
 
         if (capture() && basic() && obstacle()) {
-            return this._isMoveValid = true;
+            return this._isMoveValid = true
         }
         else {
-            return this._isMoveValid = false;
+            return this._isMoveValid = false
         }
 
     }
@@ -724,9 +747,7 @@ class Bishop extends Piece{
                     if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                         return false
                     }
-                    else {
-                        column -= 1
-                    }
+                    column -= 1
                 }
             } else if (args[2] < args[3]) {
                 let column = args[2] + 1
@@ -734,7 +755,7 @@ class Bishop extends Piece{
                     if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                         return false
                     }
-                    column += 1;
+                    column += 1
                 }
             }
             return true
@@ -745,9 +766,7 @@ class Bishop extends Piece{
                     if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                         return false
                     }
-                    else {
-                        column -= 1
-                    }
+                    column -= 1
                 }
             } else if (args[2] < args[3]) {
                 let column = args[2] + 1;
@@ -755,9 +774,7 @@ class Bishop extends Piece{
                     if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                         return false
                     }
-                    else {
-                        column += 1;
-                    }
+                    column += 1
                 }
             }
             return true
@@ -835,9 +852,7 @@ class Queen extends Piece{
                         if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                             return false
                         }
-                        else {
-                            column -= 1
-                        }
+                        column -= 1
                     }
                 } else if (args[2] < args[3]) {
                     let column = args[2] + 1
@@ -845,7 +860,7 @@ class Queen extends Piece{
                         if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                             return false
                         }
-                        column += 1;
+                        column += 1
                     }
                 }
                 return true
@@ -856,9 +871,7 @@ class Queen extends Piece{
                         if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                             return false
                         }
-                        else {
-                            column -= 1
-                        }
+                        column -= 1
                     }
                 } else if (args[2] < args[3]) {
                     let column = args[2] + 1;
@@ -866,9 +879,7 @@ class Queen extends Piece{
                         if (this._board.board[String.fromCharCode(column)][i][1] !== null) {
                             return false
                         }
-                        else {
-                            column += 1;
-                        }
+                        column += 1
                     }
                 }
                 return true
@@ -932,7 +943,6 @@ class King extends Piece{
         return this.position = [coors.split('')[0], parseInt(coors.split('')[1])]
     }
     set castling(boolean) {
-        console.log(`this castling set to false`);
         return this._castling = boolean
     }
     set checked(boolean) {
@@ -974,7 +984,8 @@ class King extends Piece{
             return false
         }
         else if (Math.abs(args[0] - args[1]) === Math.abs(args[2] - args[3]) ||
-            ((args[0] - args[1] == this.basicMoveObj.y) || (args[2] - args[3] == this.basicMoveObj.x))) {
+                ((args[0] - args[1] == this.basicMoveObj.y) ||
+                (args[2] - args[3] == this.basicMoveObj.x))) {
             return true
         } else {
             return false
