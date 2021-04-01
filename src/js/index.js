@@ -15,10 +15,70 @@ class Game {
         this.listOfSquares = document.querySelectorAll('.square');
         this.whiteKingChecked = false;
         this.blackKingChecked = false;
+        this.gameHistory = new Array();
+        this.currentState = new GameStateProvider;
+
 
         this.makeSetOfPieces();
         this.selectAndMovePiece();
         this.renderPanel();
+        this.setState(
+            this.gameTime,
+            this.whiteSetOfPieces,
+            this.blackSetOfPieces,
+            this.whiteTime, this.blackTime,
+            this.turn, this.capturedWhite, this.capturedBlack,
+            this.currentBoard, this.renderedBoard,
+            this.choosenPieceID, this.listOfSquares,
+            this.whiteKingChecked, this.blackKingChecked );
+    }
+    setState(
+        gameTime,
+        whiteSetOfPieces,
+        blackSetOfPieces,
+        whiteTime, blackTime,
+        turn, capturedWhite, capturedBlack,
+        currentBoard, renderedBoard,
+        choosenPieceID, listOfSquares,
+        whiteKingChecked, blackKingChecked
+    ) {
+        console.log('set initial state');
+        this.currentState.gameTime = gameTime,
+        this.currentState.whiteSetOfPieces = whiteSetOfPieces,
+        this.currentState.blackSetOfPieces = blackSetOfPieces,
+        this.currentState.whiteTime = whiteTime,
+        this.currentState.blackTime = blackTime,
+        this.currentState.turn = turn,
+        this.currentState.capturedWhite = capturedWhite,
+        this.currentState.capturedBlack = capturedBlack,
+        this.currentState.currentBoard = currentBoard,
+        this.currentState.renderedBoard = renderedBoard,
+        this.currentState.choosenPieceID = choosenPieceID,
+        this.currentState.listOfSquares = listOfSquares,
+        this.currentState.whiteKingChecked = whiteKingChecked,
+        this.currentState.blackKingChecked = blackKingChecked
+    }
+    updateHistory() {
+        console.log('game history update');
+        this.gameHistory.push(this.currentState.saveMemento);
+    }
+    undoMove() {
+        console.log('undo move');
+        this.currentState.restoreMemento(this.gameHistory.pop());
+        this.gameTime = this.currentState.gameTime,
+        this.whiteSetOfPieces = this.currentState.whiteSetOfPieces,
+        this.blackSetOfPieces = this.currentState.blackSetOfPieces,
+        this.whiteTime = this.currentState.whiteTime,
+        this.blackTime = this.currentState.blackTime,
+        this.turn = this.currentState.turn,
+        this.capturedWhite = this.currentState.capturedWhite,
+        this.capturedBlack = this.currentState.capturedBlack,
+        this.currentBoard = this.currentState.currentBoard,
+        this.renderedBoard = this.currentState.renderedBoard,
+        this.choosenPieceID = this.currentState.choosenPieceID,
+        this.listOfSquares = this.currentState.listOfSquares,
+        this.whiteKingChecked = this.currentState.whiteKingChecked,
+        this.blackKingChecked = this.currentState.blackKingChecked
     }
     evaluatePieceProperties(id, target, board, targPosition, currPosition) {
         // if choosen piece id is equal to value of default king position and target square is equal to value of default castling move for king, then execute castling() method:
@@ -86,6 +146,9 @@ class Game {
                     this.renderBoard()
                     // looking for check:
                     this.kingChecked(oppositePlayer)
+                    // save current state and update history of the game:
+                    this.updateHistory();
+                    console.log(`game history updated lenght: ${this.gameHistory.length}`);
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer()
                     // reset variable:
@@ -290,6 +353,70 @@ class Game {
     switchPlayer() {
         this.turn = this.turn === 'white' ? 'black' : 'white';
         this.renderPanel()
+    }
+}
+class GameState {
+    constructor(
+        gameTime,
+        whiteSetOfPieces,
+        blackSetOfPieces,
+        whiteTime, blackTime,
+        turn, capturedWhite, capturedBlack,
+        currentBoard, renderedBoard,
+        choosenPieceID, listOfSquares,
+        whiteKingChecked, blackKingChecked ){
+        this.gameTime = gameTime,
+        this.whiteSetOfPieces = whiteSetOfPieces,
+        this.blackSetOfPieces = blackSetOfPieces,
+        this.whiteTime = whiteTime,
+        this.blackTime = blackTime,
+        this.turn = turn,
+        this.capturedWhite = capturedWhite,
+        this.capturedBlack = capturedBlack,
+        this.currentBoard = currentBoard,
+        this.renderedBoard = renderedBoard,
+        this.choosenPieceID = choosenPieceID,
+        this.listOfSquares = listOfSquares,
+        this.whiteKingChecked = whiteKingChecked,
+        this.blackKingChecked = blackKingChecked
+    }
+}
+class GameStateProvider {
+    saveMemento() {
+        console.log('save memento');
+        return new GameState(
+            this.gameTime,
+            this.whiteSetOfPieces,
+            this.blackSetOfPieces,
+            this.whiteTime,
+            this.blackTime,
+            this.turn,
+            this.capturedWhite,
+            this.capturedBlack,
+            this.currentBoard,
+            this.renderedBoard,
+            this.choosenPieceID,
+            this.listOfSquares,
+            this.whiteKingChecked,
+            this.blackKingChecked
+        )
+    }
+    restoreMemento(memento) {
+        console.log('restore memento');
+        this.gameTime = memento.gameTime,
+        this.whiteSetOfPieces = memento.whiteSetOfPieces,
+        this.blackSetOfPieces = memento.blackSetOfPieces,
+        this.whiteTime = memento.whiteTime,
+        this.blackTime = memento.blackTime,
+        this.turn = memento.turn,
+        this.capturedWhite = memento.capturedWhite,
+        this.capturedBlack = memento.capturedBlack,
+        this.currentBoard = memento.currentBoard,
+        this.renderedBoard = memento.renderedBoard,
+        this.choosenPieceID = memento.choosenPieceID,
+        this.listOfSquares = memento.listOfSquares,
+        this.whiteKingChecked = memento.whiteKingChecked,
+        this.blackKingChecked = memento.blackKingChecked
     }
 }
 class Board {
@@ -1011,4 +1138,6 @@ class King extends Piece{
     }
 }
 
-let newGame = document.querySelector('.refresh').addEventListener('click', () => new Game(15))
+let newGame = document.querySelector('.refresh').addEventListener('click', () => new Game(15));
+
+let undoTrigger = document.querySelector('.undo').addEventListener('click', () => console.log('trigger'));

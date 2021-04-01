@@ -3,7 +3,7 @@
 ![GitHub Logo](/images/chess.bmp)
 
 
-[Lets play a game](starcab.wroclaw.pl)
+[Lets play a game](https://pdoubleu.github.io/js_chess_game_exercise_02_2021/)
 
 
 This old and very popular boardgame, with Indian and Persian origin, has changed over centuries. Today we know moves as 'en passant' or pawn's 'promotions' - both weren't present in the past. The project allows two humans to play on the computer in a browser. This project is still in progress, however, you can play a game (for now the 'en passant' and detecting forbidden move when the king can be checked are unable).
@@ -31,3 +31,4 @@ The following tools were used to finalize project:
     1. Visual Studio Code
     2. GIT - as a control version system
     3. Webpack - to put all project's elements together into joined files ready to deploy
+
