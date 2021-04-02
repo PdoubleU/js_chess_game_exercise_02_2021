@@ -10,75 +10,98 @@ class Game {
         this.capturedBlack = new Array();
         this.currentBoard = new Board;
         this.root = document.querySelector('#root');
-        this.renderedBoard =  this.renderBoard();
         this.choosenPieceID = null;
-        this.listOfSquares = document.querySelectorAll('.square');
+        this.listOfSquares = null;
         this.whiteKingChecked = false;
         this.blackKingChecked = false;
         this.gameHistory = new Array();
         this.currentState = new GameStateProvider;
 
-
         this.makeSetOfPieces();
-        this.selectAndMovePiece();
-        this.renderPanel();
         this.setState(
             this.gameTime,
             this.whiteSetOfPieces,
             this.blackSetOfPieces,
             this.whiteTime, this.blackTime,
             this.turn, this.capturedWhite, this.capturedBlack,
-            this.currentBoard, this.renderedBoard,
+            this.currentBoard,
             this.choosenPieceID, this.listOfSquares,
-            this.whiteKingChecked, this.blackKingChecked );
+            this.whiteKingChecked, this.blackKingChecked);
+        this.undoMove();
+        this.renderPanel();
+        this.renderBoard();
+        console.log(this.currentBoard);
+        this.listOfSquares = document.querySelectorAll('.square');
+        this.selectAndMovePiece();
     }
+    /// deep cloning!!!!! doesnt work
     setState(
         gameTime,
         whiteSetOfPieces,
         blackSetOfPieces,
         whiteTime, blackTime,
         turn, capturedWhite, capturedBlack,
-        currentBoard, renderedBoard,
+        currentBoard,
         choosenPieceID, listOfSquares,
         whiteKingChecked, blackKingChecked
     ) {
         console.log('set initial state');
         this.currentState.gameTime = gameTime,
-        this.currentState.whiteSetOfPieces = whiteSetOfPieces,
-        this.currentState.blackSetOfPieces = blackSetOfPieces,
+        this.currentState.whiteSetOfPieces = JSON.stringify(whiteSetOfPieces),
+        this.currentState.blackSetOfPieces = JSON.stringify(blackSetOfPieces),
         this.currentState.whiteTime = whiteTime,
         this.currentState.blackTime = blackTime,
         this.currentState.turn = turn,
-        this.currentState.capturedWhite = capturedWhite,
-        this.currentState.capturedBlack = capturedBlack,
-        this.currentState.currentBoard = currentBoard,
-        this.currentState.renderedBoard = renderedBoard,
+        this.currentState.capturedWhite = JSON.stringify(capturedWhite),
+        this.currentState.capturedBlack = JSON.stringify(capturedBlack),
+        this.currentState.currentBoard = JSON.stringify(currentBoard),
         this.currentState.choosenPieceID = choosenPieceID,
-        this.currentState.listOfSquares = listOfSquares,
+        this.currentState.listOfSquares = JSON.stringify(listOfSquares),
         this.currentState.whiteKingChecked = whiteKingChecked,
         this.currentState.blackKingChecked = blackKingChecked
     }
     updateHistory() {
         console.log('game history update');
-        this.gameHistory.push(this.currentState.saveMemento);
+        this.gameHistory.push(this.currentState.saveMemento());
+        console.log(this.gameHistory);
     }
     undoMove() {
         console.log('undo move');
-        this.currentState.restoreMemento(this.gameHistory.pop());
-        this.gameTime = this.currentState.gameTime,
-        this.whiteSetOfPieces = this.currentState.whiteSetOfPieces,
-        this.blackSetOfPieces = this.currentState.blackSetOfPieces,
-        this.whiteTime = this.currentState.whiteTime,
-        this.blackTime = this.currentState.blackTime,
-        this.turn = this.currentState.turn,
-        this.capturedWhite = this.currentState.capturedWhite,
-        this.capturedBlack = this.currentState.capturedBlack,
-        this.currentBoard = this.currentState.currentBoard,
-        this.renderedBoard = this.currentState.renderedBoard,
-        this.choosenPieceID = this.currentState.choosenPieceID,
-        this.listOfSquares = this.currentState.listOfSquares,
-        this.whiteKingChecked = this.currentState.whiteKingChecked,
-        this.blackKingChecked = this.currentState.blackKingChecked
+        console.log(this.gameHistory);
+        document.querySelector('.undo').addEventListener('click', () => {
+            console.log('undo triggered');
+            console.log(this.currentState);
+            console.log(this.gameHistory);
+            this.currentState.restoreMemento(this.gameHistory.pop());
+            console.log(this.currentState);
+            (() => (
+                console.log(`self executed`),
+                this.gameTime = this.currentState.gameTime,
+                this.whiteSetOfPieces = JSON.parse(this.currentState.whiteSetOfPieces),
+                this.blackSetOfPieces = JSON.parse(this.currentState.blackSetOfPieces),
+                this.whiteTime = this.currentState.whiteTime,
+                this.blackTime = this.currentState.blackTime,
+                this.turn = this.currentState.turn,
+                this.capturedWhite = JSON.parse(this.currentState.capturedWhite),
+                this.capturedBlack = JSON.parse(this.currentState.capturedBlack),
+                this.currentBoard = JSON.parse(this.currentState.currentBoard),
+                this.choosenPieceID = this.currentState.choosenPieceID,
+                this.listOfSquares = JSON.parse(this.currentState.listOfSquares),
+                this.whiteKingChecked = this.currentState.whiteKingChecked,
+                this.blackKingChecked = this.currentState.blackKingChecked
+            ))();
+            console.log(`game history undo lenght: ${this.gameHistory.length}`);
+            this.setState(
+                this.gameTime,
+                this.whiteSetOfPieces,
+                this.blackSetOfPieces,
+                this.whiteTime, this.blackTime,
+                this.turn, this.capturedWhite, this.capturedBlack,
+                this.currentBoard,
+                this.choosenPieceID, this.listOfSquares,
+                this.whiteKingChecked, this.blackKingChecked );
+            this.renderBoard();
+        })
     }
     evaluatePieceProperties(id, target, board, targPosition, currPosition) {
         // if choosen piece id is equal to value of default king position and target square is equal to value of default castling move for king, then execute castling() method:
@@ -290,6 +313,8 @@ class Game {
     renderBoard() {
         // render board inside index.html or update the board if moved piece:
         if(document.querySelector('.board_container')) {
+            console.log(`render board`);
+            console.log(this.currentBoard);
             document.querySelector('.board_container').remove()
             this.root.append(this.currentBoard.printBoard())
             // refresh Node list:
@@ -352,7 +377,6 @@ class Game {
     }
     switchPlayer() {
         this.turn = this.turn === 'white' ? 'black' : 'white';
-        this.renderPanel()
     }
 }
 class GameState {
@@ -362,7 +386,7 @@ class GameState {
         blackSetOfPieces,
         whiteTime, blackTime,
         turn, capturedWhite, capturedBlack,
-        currentBoard, renderedBoard,
+        currentBoard,
         choosenPieceID, listOfSquares,
         whiteKingChecked, blackKingChecked ){
         this.gameTime = gameTime,
@@ -374,7 +398,6 @@ class GameState {
         this.capturedWhite = capturedWhite,
         this.capturedBlack = capturedBlack,
         this.currentBoard = currentBoard,
-        this.renderedBoard = renderedBoard,
         this.choosenPieceID = choosenPieceID,
         this.listOfSquares = listOfSquares,
         this.whiteKingChecked = whiteKingChecked,
@@ -394,7 +417,6 @@ class GameStateProvider {
             this.capturedWhite,
             this.capturedBlack,
             this.currentBoard,
-            this.renderedBoard,
             this.choosenPieceID,
             this.listOfSquares,
             this.whiteKingChecked,
@@ -402,7 +424,8 @@ class GameStateProvider {
         )
     }
     restoreMemento(memento) {
-        console.log('restore memento');
+        console.log(`restore memento ${memento}`);
+        console.log(memento);
         this.gameTime = memento.gameTime,
         this.whiteSetOfPieces = memento.whiteSetOfPieces,
         this.blackSetOfPieces = memento.blackSetOfPieces,
@@ -412,7 +435,6 @@ class GameStateProvider {
         this.capturedWhite = memento.capturedWhite,
         this.capturedBlack = memento.capturedBlack,
         this.currentBoard = memento.currentBoard,
-        this.renderedBoard = memento.renderedBoard,
         this.choosenPieceID = memento.choosenPieceID,
         this.listOfSquares = memento.listOfSquares,
         this.whiteKingChecked = memento.whiteKingChecked,
@@ -470,6 +492,7 @@ class Board {
     }
     // t his method returns html tags with elements referencing to all squares on chessboard with their proper id's:
     printBoard(){
+        console.log('print board');
         let color = 'bl', container = document.createElement('div');
         container.classList.add('board_container')
         for (let elem in this.board) {
@@ -1139,5 +1162,3 @@ class King extends Piece{
 }
 
 let newGame = document.querySelector('.refresh').addEventListener('click', () => new Game(15));
-
-let undoTrigger = document.querySelector('.undo').addEventListener('click', () => console.log('trigger'));
