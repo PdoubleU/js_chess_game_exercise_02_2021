@@ -117,7 +117,7 @@ export default class Game {
         if (piece) {
             piece.validateMove = [target, board];
             (piece._isMoveValid) ? piece.updatePosition = target : void 0;
-            (piece.promote && piece._isMoveValid) ? this.promotePawn(piece, index, targPosition) : void 0
+            (piece.promote && piece._isMoveValid) ? this.promotePawn(piece, index, target) : void 0
             if (piece._isMoveValid) {
                 // update current board after valid move:
                 this.currentBoard.board[targX][targY - 1][1] = this.currentBoard.board[currX][currY - 1][1];
