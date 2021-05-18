@@ -74,10 +74,13 @@ export default class Game {
     }
     updateHistory() {
         this.gameHistory.push(this.currentState.saveMemento());
+        console.log(this.gameHistory);
+        console.log(this.whiteSetOfPieces);
     }
     undoMove() {
         document.querySelector('.undo').addEventListener('click', () => {
             if (this.gameHistory.length < 1) return;
+            console.log(this.gameHistory);
             this.currentState.restoreMemento(this.gameHistory.pop());
             (() => (
                 this.gameTime = this.currentState.gameTime,
