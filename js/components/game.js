@@ -7,15 +7,19 @@ import Queen from './queen.js';
 import Knight from './knight.js';
 import Pawn from './pawn.js';
 import Board from './board.js';
+import clockify from "../helpers.js";
 
 export default class Game {
     constructor(gameTime) {
-        this.gameTime = gameTime;
         this.whiteSetOfPieces = new Array();
         this.blackSetOfPieces = new Array();
-        this.whiteTime = null;
-        this.blackTime = null;
+        this.whiteTime = gameTime;
+        this.blackTime = gameTime;
+        this.currentTimer = null;
+        this.blackTimerDisplay = document.querySelector('.timer_black');
+        this.whiteTimerDisplay = document.querySelector('.timer_white');
         this.turn = 'white';
+        this.isGameOver = false;
         this.capturedWhite = new Array();
         this.capturedBlack = new Array();
         this.currentBoard = new Board;
@@ -70,10 +74,13 @@ export default class Game {
     }
     updateHistory() {
         this.gameHistory.push(this.currentState.saveMemento());
+        console.log(this.gameHistory);
+        console.log(this.whiteSetOfPieces);
     }
     undoMove() {
         document.querySelector('.undo').addEventListener('click', () => {
             if (this.gameHistory.length < 1) return;
+            console.log(this.gameHistory);
             this.currentState.restoreMemento(this.gameHistory.pop());
             (() => (
                 this.gameTime = this.currentState.gameTime,
@@ -117,7 +124,7 @@ export default class Game {
         if (piece) {
             piece.validateMove = [target, board];
             (piece._isMoveValid) ? piece.updatePosition = target : void 0;
-            (piece.promote && piece._isMoveValid) ? this.promotePawn(piece, index, targPosition) : void 0
+            (piece.promote && piece._isMoveValid) ? this.promotePawn(piece, index, target) : void 0
             if (piece._isMoveValid) {
                 // update current board after valid move:
                 this.currentBoard.board[targX][targY - 1][1] = this.currentBoard.board[currX][currY - 1][1];
@@ -152,16 +159,18 @@ export default class Game {
                     this.updateHistory();
                     // reset value of isChecked prop set for king and property white/blackKingIsChecked to default value false:
                     this.resetKingIsChecked(this.turn)
-                    // switch timer:
-                        // to do
                     // remove captured piece from the correct set of pieces, it has to be done before rendering new board!:
                     this.rmItemFromSetOfPieces(targetSquareClass, oppositePlayer)
                     // render updated board:
-                    this.renderBoard()
+                    this.renderBoard();
                     // looking for check:
                     this.kingChecked(oppositePlayer)
                     // switch turns depends on the current this.turn value:
                     this.switchPlayer();
+                    // reset current timer (cancel setInterval for current player):
+                    this.stopCurrentTimer();
+                    // switch timer:
+                    this.switchTimer();
                     this.renderPanel();
                     // reset variable:
                     this.choosenPieceID = null;
@@ -311,6 +320,8 @@ export default class Game {
     }
     renderPanel() {
         document.querySelector('.player').innerHTML = this.turn;
+        document.querySelector('.timer_white').innerHTML = clockify(this.whiteTime);
+        document.querySelector('.timer_black').innerHTML = clockify(this.blackTime);
     }
     makeSetOfPieces() {
         // method iterate through initialy set board and fill two arrays with newly created objects with unique names and coordinates on the board:
@@ -358,7 +369,18 @@ export default class Game {
         }
     }
     switchTimer() {
-        //to do
+        let timer = setInterval(() => {
+            if (this[`${this.turn}Time`] === 0) {
+                clearInterval(this.currentTimer);
+                return this.isGameOver = true;
+                };
+            this[`${this.turn}Time`] -= 1;
+            this[`${this.turn}TimerDisplay`].innerHTML = clockify(this[`${this.turn}Time`]);
+        }, 1000);
+        return this.currentTimer = timer;
+    }
+    stopCurrentTimer(){
+        clearInterval(this.currentTimer);
     }
     switchPlayer() {
         this.turn = this.turn === 'white' ? 'black' : 'white';
