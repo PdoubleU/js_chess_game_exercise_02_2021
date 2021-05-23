@@ -3,7 +3,6 @@ import GameState from './gamestate.js';
 export default class GameStateProvider {
     saveMemento() {
         return new GameState(
-            this.gameTime,
             this.whiteSetOfPieces,
             this.blackSetOfPieces,
             this.whiteTime,
@@ -19,7 +18,6 @@ export default class GameStateProvider {
         )
     }
     restoreMemento(memento) {
-        this.gameTime = memento.gameTime,
         this.whiteSetOfPieces = memento.whiteSetOfPieces,
         this.blackSetOfPieces = memento.blackSetOfPieces,
         this.whiteTime = memento.whiteTime,
