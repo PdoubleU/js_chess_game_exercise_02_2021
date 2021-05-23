@@ -260,7 +260,7 @@ export default class Game {
         let king = this[`${color}SetOfPieces`].find(elem => /[k]_/i.test(elem.id));
         let rookQSide = this[`${color}SetOfPieces`].find(elem => /[r]_a/i.test(elem.id))
         let rookKSide = this[`${color}SetOfPieces`].find(elem => /[r]_h/i.test(elem.id));
-        if (!king._castling) {
+        if (!king._castling || this[`${color}KingChecked`] ) {
             validation = false
             return [validation, positions]
         }
