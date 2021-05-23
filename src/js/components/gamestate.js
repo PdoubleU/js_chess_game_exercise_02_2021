@@ -1,6 +1,5 @@
 export default class GameState {
     constructor(
-        gameTime,
         whiteSetOfPieces,
         blackSetOfPieces,
         whiteTime, blackTime,
@@ -8,7 +7,6 @@ export default class GameState {
         currentBoard,
         choosenPieceID, listOfSquares,
         whiteKingChecked, blackKingChecked ){
-        this.gameTime = gameTime,
         this.whiteSetOfPieces = whiteSetOfPieces,
         this.blackSetOfPieces = blackSetOfPieces,
         this.whiteTime = whiteTime,

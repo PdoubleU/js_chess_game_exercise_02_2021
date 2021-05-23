@@ -1,3 +1,7 @@
 import Game from './components/game.js';
 
-document.querySelector('.refresh').addEventListener('click', () => new Game(300));
+let newGame;
+
+document.querySelector('.refresh').addEventListener('click', () => newGame = new Game(300));
+
+document.querySelector('.undo').addEventListener('click', () => newGame.undoMove());

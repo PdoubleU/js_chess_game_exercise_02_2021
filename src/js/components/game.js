@@ -30,14 +30,7 @@ export default class Game {
         this.blackKingChecked = false;
         this.gameHistory = new Array();
         this.currentState = new GameStateProvider;
-        this.setStateParams = [this.gameTime,
-            this.whiteSetOfPieces,
-            this.blackSetOfPieces,
-            this.whiteTime, this.blackTime,
-            this.turn, this.capturedWhite, this.capturedBlack,
-            this.currentBoard,
-            this.choosenPieceID, this.listOfSquares,
-            this.whiteKingChecked, this.blackKingChecked]
+        this.setStateParams = new Array();
 
         this.makeSetOfPieces();
         this.undoMove();
@@ -45,11 +38,11 @@ export default class Game {
         this.renderBoard();
         this.listOfSquares = document.querySelectorAll('.square');
         this.selectAndMovePiece();
+        this.copyCurrState();
         this.setState(...this.setStateParams);
     }
 
     setState(
-        gameTime,
         whiteSetOfPieces,
         blackSetOfPieces,
         whiteTime, blackTime,
@@ -58,49 +51,57 @@ export default class Game {
         choosenPieceID, listOfSquares,
         whiteKingChecked, blackKingChecked
     ) {
-        this.currentState.gameTime = gameTime,
-        this.currentState.whiteSetOfPieces = cloneDeep(whiteSetOfPieces),
-        this.currentState.blackSetOfPieces = cloneDeep(blackSetOfPieces),
+        this.currentState.whiteSetOfPieces = whiteSetOfPieces,
+        this.currentState.blackSetOfPieces = blackSetOfPieces,
         this.currentState.whiteTime = whiteTime,
         this.currentState.blackTime = blackTime,
         this.currentState.turn = turn,
-        this.currentState.capturedWhite = cloneDeep(capturedWhite),
-        this.currentState.capturedBlack = cloneDeep(capturedBlack),
-        this.currentState.currentBoard = cloneDeep(currentBoard),
+        this.currentState.capturedWhite = capturedWhite,
+        this.currentState.capturedBlack = capturedBlack,
+        this.currentState.currentBoard = currentBoard,
         this.currentState.choosenPieceID = choosenPieceID,
-        this.currentState.listOfSquares = cloneDeep(listOfSquares),
+        this.currentState.listOfSquares = listOfSquares,
         this.currentState.whiteKingChecked = whiteKingChecked,
         this.currentState.blackKingChecked = blackKingChecked
     }
+    copyCurrState(){
+        // return array of copied variables from constructor representing the current game state:
+        return this.setStateParams = [
+            cloneDeep(this.whiteSetOfPieces),
+            cloneDeep(this.blackSetOfPieces),
+            this.whiteTime, this.blackTime,
+            this.turn, cloneDeep(this.capturedWhite), cloneDeep(this.capturedBlack),
+            cloneDeep(this.currentBoard),
+            this.choosenPieceID, cloneDeep(this.listOfSquares),
+            this.whiteKingChecked, this.blackKingChecked
+        ]
+    }
     updateHistory() {
+        // gameHistory get a new element which represents the recent state of the game taken thanks to GameStateProvider
         this.gameHistory.push(this.currentState.saveMemento());
-        console.log(this.gameHistory);
-        console.log(this.whiteSetOfPieces);
     }
     undoMove() {
-        document.querySelector('.undo').addEventListener('click', () => {
-            if (this.gameHistory.length < 1) return;
-            console.log(this.gameHistory);
-            this.currentState.restoreMemento(this.gameHistory.pop());
-            (() => (
-                this.gameTime = this.currentState.gameTime,
-                this.whiteSetOfPieces = cloneDeep(this.currentState.whiteSetOfPieces),
-                this.blackSetOfPieces = cloneDeep(this.currentState.blackSetOfPieces),
-                this.whiteTime = this.currentState.whiteTime,
-                this.blackTime = this.currentState.blackTime,
-                this.turn = this.currentState.turn,
-                this.capturedWhite = cloneDeep(this.currentState.capturedWhite),
-                this.capturedBlack = cloneDeep(this.currentState.capturedBlack),
-                this.currentBoard = cloneDeep(this.currentState.currentBoard),
-                this.choosenPieceID = this.currentState.choosenPieceID,
-                this.listOfSquares = cloneDeep(this.currentState.listOfSquares),
-                this.whiteKingChecked = this.currentState.whiteKingChecked,
-                this.blackKingChecked = this.currentState.blackKingChecked
-            ))();
-            this.setState(...this.setStateParams);
-            this.renderBoard();
-            this.renderPanel();
-        })
+        // return when the history is empty (the very first stage of the game):
+        if (this.gameHistory.length < 1) return;
+        // restore memento update this.currentState by taking the last item from the gameHistory:
+        this.currentState.restoreMemento(this.gameHistory.pop());
+        // block below update constructor variables using the restored this.currentState:
+            this.whiteSetOfPieces = cloneDeep(this.currentState.whiteSetOfPieces)
+            this.blackSetOfPieces = cloneDeep(this.currentState.blackSetOfPieces)
+            this.whiteTime = this.currentState.whiteTime
+            this.blackTime = this.currentState.blackTime
+            this.turn = this.currentState.turn
+            this.capturedWhite = cloneDeep(this.currentState.capturedWhite)
+            this.capturedBlack = cloneDeep(this.currentState.capturedBlack)
+            this.currentBoard = cloneDeep(this.currentState.currentBoard)
+            this.choosenPieceID = this.currentState.choosenPieceID
+            this.listOfSquares = cloneDeep(this.currentState.listOfSquares)
+            this.whiteKingChecked = this.currentState.whiteKingChecked
+            this.blackKingChecked = this.currentState.blackKingChecked
+            
+        // render board and panel with restored data:
+        this.renderBoard();
+        this.renderPanel();
     }
     evaluatePieceProperties(id, target, board, [targX, targY], [currX, currY]) {
         // if choosen piece id is equal to value of default king position and target square is equal to value of default castling move for king, then execute castling() method:
@@ -174,7 +175,8 @@ export default class Game {
                     this.renderPanel();
                     // reset variable:
                     this.choosenPieceID = null;
-                    // save current state:
+                    //copy and save current state:
+                    this.copyCurrState();
                     this.setState(...this.setStateParams);
                     return;
                 } else {
@@ -386,3 +388,4 @@ export default class Game {
         this.turn = this.turn === 'white' ? 'black' : 'white';
     }
 }
+
