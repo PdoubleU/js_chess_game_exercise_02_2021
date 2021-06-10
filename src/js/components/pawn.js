@@ -4,7 +4,7 @@ export default class Pawn extends Piece{
     constructor(id, coordinates, color){
         super(id, coordinates, color)
         this.specialMove = true;
-        this.enPassant = true;
+        this.enPassant = false;
         this.promote = false;
 
         this.specialMoveObj = this.specialMoveObj();
@@ -12,6 +12,7 @@ export default class Pawn extends Piece{
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
+        console.log('validate moves')
         this._targetSquare = args[0]
         this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
@@ -27,16 +28,19 @@ export default class Pawn extends Piece{
 
         if (capture()) {
             promote();
+            this.enPassant = false;
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (special() && this.specialMove && obstacle()) {
             promote();
+            this.enPassant = true;
             this.specialMove = false;
             return this._isMoveValid = true;
         }
         else if (basic() && obstacle()) {
             promote();
+            this.enPassant = false;
             this.specialMove = false;
             return this._isMoveValid = true;
         }
@@ -100,7 +104,6 @@ export default class Pawn extends Piece{
         }
     }
     isMoveCapture(args){
-        // to do: enPassant
         if ((args[0] - args[1] == this.captureMoveObj.y) &&
             (args[2] - args[3] == this.captureMoveObj.x[0] || args[2] - args[3] == this.captureMoveObj.x[1]) &&
             this.isCapturedPieceEnemy(args[4])) {
@@ -139,11 +142,10 @@ export default class Pawn extends Piece{
         }
     }
     isCapturedPieceEnemy(targPiece) {
-        // to do: enPassant
         if (this.color === 'white')  {
-            return (/[a-z]_/.test(targPiece))
+            return (/[a-z]_/.test(targPiece) || /enPassant/.test(targPiece));
         } else  {
-            return (/[A-Z]_/.test(targPiece))
+            return (/[A-Z]_/.test(targPiece) || /enPassant/.test(targPiece));
         }
     }
 }
