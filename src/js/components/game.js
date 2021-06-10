@@ -31,6 +31,8 @@ export default class Game {
         this.gameHistory = new Array();
         this.currentState = new GameStateProvider;
         this.setStateParams = new Array();
+        this.enPassantPawnCoors = [];
+        this.enPassantPawnBoardCoors = [];
 
         this.makeSetOfPieces();
         this.undoMove();
@@ -98,12 +100,12 @@ export default class Game {
             this.listOfSquares = cloneDeep(this.currentState.listOfSquares)
             this.whiteKingChecked = this.currentState.whiteKingChecked
             this.blackKingChecked = this.currentState.blackKingChecked
-            
+
         // render board and panel with restored data:
         this.renderBoard();
         this.renderPanel();
     }
-    evaluatePieceProperties(id, target, board, [targX, targY], [currX, currY]) {
+    evaluatePieceProperties(id, target, targetClass, board, [targX, targY], [currX, currY]) {
         // if choosen piece id is equal to value of default king position and target square is equal to value of default castling move for king, then execute castling() method:
         if ((this.choosenPieceID === 'e1' || this.choosenPieceID === 'e8') &&
             (target === 'c1' || target === 'g1' || target === 'c8' || target === 'g8')) {
@@ -119,18 +121,33 @@ export default class Game {
             this.currentBoard.board[rookCurr[0]][rookCurr[1] - 1][1] = null
             return true
         }
-
         let piece = this[`${this.turn}SetOfPieces`].find(elem => elem.id === id);
         let index = this[`${this.turn}SetOfPieces`].findIndex(elem => elem.id === id);
         if (piece) {
             piece.validateMove = [target, board];
+
             (piece._isMoveValid) ? piece.updatePosition = target : void 0;
-            (piece.promote && piece._isMoveValid) ? this.promotePawn(piece, index, target) : void 0
+            (piece.promote && piece._isMoveValid) ? this.promotePawn(piece, index, target) : void 0;
             if (piece._isMoveValid) {
+                // remove enPassant from the board - opponent did or didn't capture pawn in enPassant:
+                for (let col in this.currentBoard.board) {
+                    this.currentBoard.board[col].forEach(square => square[1] === 'enPassant' && (square[1] = null));
+                }
                 // update current board after valid move:
                 this.currentBoard.board[targX][targY - 1][1] = this.currentBoard.board[currX][currY - 1][1];
                 this.currentBoard.board[currX][currY - 1][1] = null;
+                // remove pawn from the board if was captured as enPassant target:
+                if (targetClass === 'enPassant') {
+                    this.currentBoard.board[this.enPassantPawnBoardCoors[0]][this.enPassantPawnBoardCoors[1] - 1][1] = null;
+                }
+                // code belowe set the square value to 'enPassant' which allows opponent to do enPassant capture:
+                if (piece.enPassant) {
+                    this.enPassantPawnCoors = [id, this.turn];
+                    this.enPassantPawnBoardCoors = [targX, targY];
+                    this.turn === 'white' ? this.currentBoard.board[currX][currY][1] = 'enPassant' : this.currentBoard.board[currX][currY - 2][1] = 'enPassant';
+                }
             }
+
             return piece._isMoveValid
         }
         return false
@@ -154,14 +171,15 @@ export default class Game {
                     currentRow = this.choosenPieceID.split('')[1],
                     currentColumn = this.choosenPieceID.split('')[0],
                     oppositePlayer = (/[A-Z]_/.test(currSquareClass)) ? 'black' : 'white',
-                    evaluatePieceProps = () => this.evaluatePieceProperties(currSquareClass, e.target.id, this.currentBoard, [targetColumn, targetRow], [currentColumn, currentRow]);
-                if(evaluatePieceProps()){
+                    props = [currSquareClass, e.target.id, targetSquareClass, this.currentBoard, [targetColumn, targetRow], [currentColumn, currentRow]];
+
+                if(this.evaluatePieceProperties(...props)){
                     // update game history with the current board status before valid move:
                     this.updateHistory();
                     // reset value of isChecked prop set for king and property white/blackKingIsChecked to default value false:
                     this.resetKingIsChecked(this.turn)
                     // remove captured piece from the correct set of pieces, it has to be done before rendering new board!:
-                    this.rmItemFromSetOfPieces(targetSquareClass, oppositePlayer)
+                    this.rmItemFromSetOfPieces(/enPassant/.test(targetSquareClass) ? this.enPassantPawnCoors : [targetSquareClass, oppositePlayer]);
                     // render updated board:
                     this.renderBoard();
                     // looking for check:
@@ -217,8 +235,9 @@ export default class Game {
         this[`${color}KingChecked`] = false;
         king.checked = false;
     }
-    rmItemFromSetOfPieces(id, color) {
-        if (!id) { return }
+    rmItemFromSetOfPieces(params) {
+        const [id, color] = params;
+        if (!id) return;
         let tempArray = this[`${color}SetOfPieces`].filter(elem => (elem.id !== id) ? elem : void 1);
         this[`${color}SetOfPieces`] = tempArray;
     }
