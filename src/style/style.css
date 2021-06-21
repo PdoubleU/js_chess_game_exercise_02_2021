@@ -15,6 +15,7 @@ body {
 	grid-template-columns: repeat(8, 1fr);
 	grid-template-rows: 100%;
 }
+
 .column {
 	display: grid;
 	grid-template-columns: 100%;
@@ -31,6 +32,7 @@ body {
 }
 .promote_white,
 .promote_black {
+	position: absolute;
 	visibility: hidden;
 	list-style: none;
 }
@@ -118,4 +120,24 @@ body {
 	height: 2rem;
 	width: 4rem;
 	text-align: center;
+}
+
+@media (min-width: 1280px){
+	.board_container {
+		width: 36rem;
+		height: 36rem;
+	}
+	.square {
+		width: 4.5rem;
+		height: 4.5rem;
+		line-height: 4rem;
+	}
+	.fig {
+		width: 4.5rem;
+		height: 4.5rem;
+		background-size: 4rem;
+	}
+	.column > div {
+		background-size: 4rem;
+	}
 }

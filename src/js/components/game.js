@@ -390,15 +390,16 @@ export default class Game {
         }
     }
     switchTimer() {
-        let timer = setInterval(() => {
+        let timerID = setInterval(() => {
             if (this[`${this.turn}Time`] === 0) {
                 clearInterval(this.currentTimer);
+                console.log('game over')
                 return this.isGameOver = true;
                 };
             this[`${this.turn}Time`] -= 1;
             this[`${this.turn}TimerDisplay`].innerHTML = clockify(this[`${this.turn}Time`]);
         }, 1000);
-        return this.currentTimer = timer;
+        return this.currentTimer = timerID;
     }
     stopCurrentTimer(){
         clearInterval(this.currentTimer);
