@@ -207,6 +207,7 @@ export default class Game {
         });
     }
     kingChecked(color) {
+        const styles = "background-color: #ff0000; outline: .2rem solid #a50000; outline-offset: -.2rem";
         let kingPosition = this[`${color}SetOfPieces`].find(elem => (elem.id === 'k_e' || elem.id === 'K_e') ? elem : void 0);
         let king = kingPosition;
         kingPosition = kingPosition.position[0] + kingPosition.position[1];
@@ -225,7 +226,7 @@ export default class Game {
         if (king._isChecked === true) {
             for (let elem in this.currentBoard.board) {
                 for (let i = 0; i < this.currentBoard.board[elem].length; i++) {
-                    (this.currentBoard.board[elem][i][1] === king.id) ? document.getElementById(`${king.position[0] + king.position[1]}`).style.backgroundColor = 'red' : void 0;
+                    (this.currentBoard.board[elem][i][1] === king.id) ? document.getElementById(`${king.position[0] + king.position[1]}`).style.cssText = styles : void 0;
                 }
             }
         }
@@ -242,7 +243,8 @@ export default class Game {
         this[`${color}SetOfPieces`] = tempArray;
     }
     promotePawn(object, index, targetPosition) {
-        document.querySelector(`.promote_${object.color}`).style.visibility = 'visible'
+        const promoteBox = document.querySelector(`.promote_${object.color}`);
+        promoteBox.style.visibility = 'visible'
         document.querySelectorAll(`.fig_${object.color}`)
         .forEach(elem => elem.onclick = e => takeNewPiece(e));
         let takeNewPiece = (e) => {
@@ -340,7 +342,7 @@ export default class Game {
         this.root.append(this.currentBoard.printBoard())
     }
     renderPanel() {
-        document.querySelector('.player').innerHTML = this.turn;
+        document.querySelector('.player').innerHTML = 'Turn' + `<span class='curr_player'> ${this.turn}</span>`;
         document.querySelector('.timer_white').innerHTML = clockify(this.whiteTime);
         document.querySelector('.timer_black').innerHTML = clockify(this.blackTime);
     }
@@ -390,7 +392,7 @@ export default class Game {
         }
     }
     switchTimer() {
-        let timer = setInterval(() => {
+        let timerID = setInterval(() => {
             if (this[`${this.turn}Time`] === 0) {
                 clearInterval(this.currentTimer);
                 return this.isGameOver = true;
@@ -398,7 +400,7 @@ export default class Game {
             this[`${this.turn}Time`] -= 1;
             this[`${this.turn}TimerDisplay`].innerHTML = clockify(this[`${this.turn}Time`]);
         }, 1000);
-        return this.currentTimer = timer;
+        return this.currentTimer = timerID;
     }
     stopCurrentTimer(){
         clearInterval(this.currentTimer);

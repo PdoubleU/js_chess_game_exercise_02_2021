@@ -12,7 +12,6 @@ export default class Pawn extends Piece{
         this.basicMoveObj = this.straightMoveObj();
     }
     set validateMove(args) {
-        console.log('validate moves')
         this._targetSquare = args[0]
         this._board = args[1]
         let targetX = this._targetSquare.split('')[0].charCodeAt(0),
