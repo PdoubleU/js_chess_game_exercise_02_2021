@@ -5,36 +5,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Board game chess</title>
-    <div class="check"></div>
     <link href='./style/style.css' rel="stylesheet">
     <script src="./js/index.js" type="module" async></script>
 </head>
 <body>
     <main id="root">
-        <h2>Chess</h2>
-        <button class="refresh">Start new game...</button>
-        <button class="undo">Undo...</button>
-        <button class="redo">Redo...</button>
-        <div class="timer">
-            <div class="timer_white"></div>
-            <div class="timer_black"></div>
+        <div class="start_screen">
+            <h1>Chess</h1>
+            <h2 class="start_header">Fight on the board with Your enemy. May the best man win!</h2>
+            <button class="play start_button">New game...</button>
         </div>
-        <ul class="promote_white">You choose new figure:
-            <li id="R_a" class="fig fig_white R_a R"></li>
-            <li id="N_b" class="fig fig_white N_b N"></li>
-            <li id="B_c" class="fig fig_white B_c B"></li>
-            <li id="Q_d" class="fig fig_white Q_d Q"></li>
-        </ul>
-        <ul class="promote_black">You choose new figure:
-            <li id="r_a" class="fig fig_black r_a r"></li>
-            <li id="n_b" class="fig fig_black n_b n"></li>
-            <li id="b_c" class="fig fig_black b_c b"></li>
-            <li id="q_d" class="fig fig_black q_d q"></li>
-        </ul>
-        <div>
-            <h4>Player:</h4>
-            <p class="player"></p>
-        </div>
+        <span class="control_panel hidden">
+            <span class="button_set">
+                <button class="play">New game...</button>
+                <button class="undo">Undo...</button>
+            </span>
+            <div class="timer">
+                <div class="timer_white"></div>
+                <div class="timer_black"></div>
+            </div>
+            <ul class="promote_white">White may choose new figure:
+                <li id="R_a" class="fig fig_white R_a R"></li>
+                <li id="N_b" class="fig fig_white N_b N"></li>
+                <li id="B_c" class="fig fig_white B_c B"></li>
+                <li id="Q_d" class="fig fig_white Q_d Q"></li>
+            </ul>
+            <ul class="promote_black">Black may choose new figure:
+                <li id="r_a" class="fig fig_black r_a r"></li>
+                <li id="n_b" class="fig fig_black n_b n"></li>
+                <li id="b_c" class="fig fig_black b_c b"></li>
+                <li id="q_d" class="fig fig_black q_d q"></li>
+            </ul>
+            <div class="turn">
+                <p class="player"></p>
+            </div>
+        </span>
     </main>
 </body>
 </html>
