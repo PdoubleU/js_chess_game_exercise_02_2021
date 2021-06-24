@@ -6,13 +6,7 @@
 [Let's play a game](https://pdoubleu.github.io/js_chess_game_exercise_02_2021/)
 
 
-This old and very popular boardgame, with Indian and Persian origin, has changed over centuries. Today we know moves as 'en passant' or pawn's 'promotions' - both weren't present in the past. The project allows two humans to play on the computer in a browser. This project is still in progress, however, you can play a game (for now the 'en passant' and detecting forbidden move when the king can be checked are unable).
-
-To do:
-    'en passant',
-    forbidden move for pieces if the move is uncovering the king,
-    timer,
-    game history
+This old and very popular board game, with Indian and Persian origin, has changed over the centuries. Today we know moves as 'en passant' or pawn's 'promotions' - both weren't present in the past. The project allows two humans to play on the computer in a browser. This project is finished besides one feature: 'check' detection for pieces that are covering king from the 'check'. This feature is not a problem to play a game, but it is present in all modern chess programs. And is helpful for players.
 
 ## Used technologies and approaches
 
