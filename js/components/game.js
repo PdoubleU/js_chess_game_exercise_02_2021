@@ -158,10 +158,12 @@ export default class Game {
                 return;
             }
             if (this.choosenPieceID === e.target.id) {
+                e.target.classList.remove('active_square');
                 this.choosenPieceID = null;
                 return;
             }
-            else if (this.choosenPieceID != e.target.id && this.choosenPieceID) {
+            else if (this.choosenPieceID && this.choosenPieceID != e.target.id) {
+                console.log('this is diffirente piece or empty field', e.target.id, this.choosenPieceID)
                 let currSquare = document.querySelector(`#${this.choosenPieceID}`),
                     currSquareClass = currSquare.classList[2],
                     targetSquare = document.querySelector(`#${e.target.id}`),
@@ -198,10 +200,13 @@ export default class Game {
                     this.setState(...this.setStateParams);
                     return;
                 } else {
+                    const choosenPieceClassList = document.getElementById(this.choosenPieceID);
+                    choosenPieceClassList.classList.remove('active_square');
                     this.choosenPieceID = null;
                 }
             }
             else {
+                e.target.classList.add('active_square');
                 this.choosenPieceID = e.target.id;
             }
         });
